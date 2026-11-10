@@ -35,6 +35,12 @@ pub async fn get_analisis() -> Result<Analisis, ServerFnError> {
     di_latar(|| analitik::hasil().analisis.clone()).await
 }
 
+/// Keterangan umum hasil analitik (mode data, posisi data, tahun acuan).
+#[server]
+pub async fn get_meta() -> Result<crate::dto::Meta, ServerFnError> {
+    di_latar(|| analitik::hasil().analisis.meta.clone()).await
+}
+
 /// Daftar ringkas seluruh satuan kerja.
 #[server]
 pub async fn get_satker() -> Result<Vec<SatkerBaris>, ServerFnError> {

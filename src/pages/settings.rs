@@ -2,7 +2,7 @@ use leptos::prelude::*;
 
 use crate::components::ui::{Badge, ErrorBlock, LoadingBlock, SectionCard};
 use crate::model::ConnInfo;
-use crate::server_fns::{get_conn_info, save_conn_config};
+use crate::server_fns::{get_asumsi, get_conn_info, save_asumsi, save_conn_config};
 
 /// Halaman pengaturan: kredensial koneksi SLDK dan status token.
 #[component]
@@ -56,7 +56,7 @@ fn SettingsBody(
         <div class="space-y-4">
             <SectionCard
                 title="Status Koneksi"
-                subtitle=Some("Ringkasan konfigurasi yang sedang dipakai server".into())
+                subtitle="Ringkasan konfigurasi yang sedang dipakai server"
             >
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <StatusItem
@@ -100,7 +100,7 @@ fn SettingsBody(
 
             <SectionCard
                 title="Kredensial SLDK"
-                subtitle=Some("Nilai disimpan di server (data/config.json) dan tidak pernah dikirim balik ke peramban".into())
+                subtitle="Nilai disimpan di server (data/config.json) dan tidak pernah dikirim balik ke peramban"
             >
                 <form
                     class="grid gap-3 sm:grid-cols-2"
@@ -213,7 +213,9 @@ fn SettingsBody(
                 }}
             </SectionCard>
 
-            <SectionCard title="Panduan Singkat" subtitle=None>
+            <AsumsiForm/>
+
+            <SectionCard title="Panduan Singkat">
                 <ol class="list-decimal space-y-1.5 pl-5 text-sm text-ink-600 dark:text-ink-300">
                     <li>"Isi Client ID, Client Secret, Grant Type, dan BA_KEY dari Kementerian Keuangan."</li>
                     <li>"Klik Simpan & Uji Token — server akan mengambil token SSO (berlaku 1 jam)."</li>
@@ -247,5 +249,88 @@ fn StatusItem(label: &'static str, value: String, ok: bool) -> impl IntoView {
                 <span class="truncate" title=value.clone()>{value.clone()}</span>
             </p>
         </div>
+    }
+}
+
+/// Formulir asumsi analitik (eskalasi harga, faktor rehabilitasi, satuan sisa umur).
+#[component]
+fn AsumsiForm() -> impl IntoView {
+    let awal = Resource::new(|| (), |_| async move { get_asumsi().await });
+    let (eskalasi, set_eskalasi) = signal(String::new());
+    let (rehab, set_rehab) = signal(String::new());
+    let (satuan, set_satuan) = signal("tahun".to_string());
+    let (pesan, set_pesan) = signal(Option::<Result<String, String>>::None);
+    let (sibuk, set_sibuk) = signal(false);
+
+    // Isi formulir dari nilai tersimpan begitu tersedia.
+    Effect::new(move |_| {
+        if let Some(Ok(a)) = awal.get() {
+            set_eskalasi.set(format!("{:.1}", a.eskalasi * 100.0));
+            set_rehab.set(format!("{:.0}", a.faktor_rehab * 100.0));
+            set_satuan.set(a.satuan_umur_sisa);
+        }
+    });
+
+    view! {
+        <SectionCard title="Asumsi Analitik" subtitle="dipakai analisis kebutuhan dan prediksi">
+            <Suspense fallback=|| view! { <LoadingBlock rows=2/> }>
+                {move || awal.get().map(|_| ())}
+            </Suspense>
+            <form
+                class="grid gap-3 sm:grid-cols-3"
+                on:submit=move |ev| {
+                    ev.prevent_default();
+                    let angka = |s: String| s.trim().replace(',', ".").parse::<f64>();
+                    let (Ok(e), Ok(r)) = (angka(eskalasi.get_untracked()), angka(rehab.get_untracked())) else {
+                        set_pesan.set(Some(Err("Isi angka yang sah, mis. 3 atau 3,5.".into())));
+                        return;
+                    };
+                    let st = satuan.get_untracked();
+                    set_sibuk.set(true);
+                    set_pesan.set(None);
+                    leptos::task::spawn_local(async move {
+                        let res = save_asumsi(e, r, st).await;
+                        set_sibuk.set(false);
+                        set_pesan.set(Some(match res {
+                            Ok(_) => Ok("Asumsi tersimpan. Seluruh analitik dihitung ulang saat halaman berikutnya dibuka.".into()),
+                            Err(e) => Err(e.to_string()),
+                        }));
+                    });
+                }
+            >
+                <label>
+                    <span class="mb-1 block text-xs font-medium text-ink-500 dark:text-ink-300">"Eskalasi harga per tahun (%)"</span>
+                    <input class="input" inputmode="decimal" prop:value=move || eskalasi.get() on:input=move |ev| set_eskalasi.set(event_target_value(&ev))/>
+                </label>
+                <label>
+                    <span class="mb-1 block text-xs font-medium text-ink-500 dark:text-ink-300">"Biaya rehabilitasi berat (% nilai bangunan)"</span>
+                    <input class="input" inputmode="decimal" prop:value=move || rehab.get() on:input=move |ev| set_rehab.set(event_target_value(&ev))/>
+                </label>
+                <label>
+                    <span class="mb-1 block text-xs font-medium text-ink-500 dark:text-ink-300">"Satuan kolom umur_sisa"</span>
+                    <select class="input" prop:value=move || satuan.get() on:change=move |ev| set_satuan.set(event_target_value(&ev))>
+                        <option value="tahun">"tahun"</option>
+                        <option value="semester">"semester"</option>
+                        <option value="bulan">"bulan"</option>
+                    </select>
+                </label>
+                <div class="sm:col-span-3">
+                    <button type="submit" class="btn-primary" disabled=move || sibuk.get()>
+                        {move || if sibuk.get() { "Menyimpan…" } else { "💾 Simpan asumsi" }}
+                    </button>
+                </div>
+            </form>
+            {move || {
+                pesan
+                    .get()
+                    .map(|r| match r {
+                        Ok(t) => view! { <p class="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-200">{t}</p> }.into_any(),
+                        Err(e) => view! { <div class="mt-3"><ErrorBlock message=e/></div> }.into_any(),
+                    })
+            }}
+            <p class="mt-3 text-xs text-ink-500 dark:text-ink-400">
+                "Halaman Mutu Data memuat uji kesesuaian satuan umur_sisa terhadap penyusutan; ubah satuan di sini bila uji itu menunjukkan ketidakselarasan."
+            </p>
+        </SectionCard>
     }
 }

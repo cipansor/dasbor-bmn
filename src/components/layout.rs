@@ -17,46 +17,50 @@ struct NavItem {
     href: &'static str,
     label: &'static str,
     icon: &'static str,
-    desc: &'static str,
 }
 
-const NAV: &[NavItem] = &[
-    NavItem {
-        href: "/",
-        label: "Ringkasan",
-        icon: "📊",
-        desc: "KPI & analitik utama",
-    },
-    NavItem {
-        href: "/laporan",
-        label: "Laporan",
-        icon: "🧾",
-        desc: "Unduh laporan PDF",
-    },
-    NavItem {
-        href: "/kategori",
-        label: "Kategori Aset",
-        icon: "🗂️",
-        desc: "15 kategori BMN",
-    },
-    NavItem {
-        href: "/data",
-        label: "Data Aset",
-        icon: "🔎",
-        desc: "Telusuri & ekspor",
-    },
-    NavItem {
-        href: "/sinkronisasi",
-        label: "Sinkronisasi",
-        icon: "🔄",
-        desc: "Tarik data SLDK",
-    },
-    NavItem {
-        href: "/pengaturan",
-        label: "Pengaturan",
-        icon: "⚙️",
-        desc: "Kredensial & koneksi",
-    },
+const fn item(href: &'static str, label: &'static str, icon: &'static str) -> NavItem {
+    NavItem { href, label, icon }
+}
+
+/// Navigasi dikelompokkan menurut cara pimpinan membaca: ringkasan dan
+/// pandangan ke depan lebih dulu, rincian sesudahnya, pengelolaan sistem terakhir.
+const NAV: &[(&str, &[NavItem])] = &[
+    (
+        "Pimpinan",
+        &[
+            item("/", "Ringkasan Eksekutif", "📊"),
+            item("/kondisi", "Kondisi & Risiko", "🩺"),
+            item("/prediksi", "Prediksi 5 Tahun", "🔮"),
+            item("/kebutuhan", "Analisis Kebutuhan", "🧮"),
+            item("/prakiraan", "Forecast Perolehan", "📈"),
+            item("/rekomendasi", "Rekomendasi", "✅"),
+        ],
+    ),
+    (
+        "Rincian",
+        &[
+            item("/satker", "Satuan Kerja", "🏛️"),
+            item("/wilayah", "Wilayah", "🗺️"),
+            item("/kategori", "Kategori Aset", "🗂️"),
+            item("/data", "Data Aset", "🔎"),
+        ],
+    ),
+    (
+        "Tata Kelola",
+        &[
+            item("/kualitas", "Mutu Data", "🧪"),
+            item("/laporan", "Laporan PDF", "🧾"),
+            item("/metodologi", "Metodologi", "📐"),
+        ],
+    ),
+    (
+        "Sistem",
+        &[
+            item("/sinkronisasi", "Sinkronisasi", "🔄"),
+            item("/pengaturan", "Pengaturan", "⚙️"),
+        ],
+    ),
 ];
 
 /// Kerangka aplikasi: sidebar desktop, drawer mobile, dan bilah atas.
@@ -66,14 +70,14 @@ pub fn AppShell(children: Children) -> impl IntoView {
     let (open, set_open) = signal(false);
     let pathname = move || location.pathname.get();
 
-    let is_active = move |href: &str| {
+    let is_active = Callback::new(move |href: &'static str| {
         let p = pathname();
         if href == "/" {
             p == "/"
         } else {
-            p.starts_with(href)
+            p == href || p.starts_with(&format!("{href}/"))
         }
-    };
+    });
 
     Effect::new(move |_| {
         let _ = pathname();
@@ -83,44 +87,14 @@ pub fn AppShell(children: Children) -> impl IntoView {
     view! {
         <div class="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
             // Sidebar (desktop)
-            <aside class="sticky top-0 hidden h-dvh flex-col border-r border-ink-200 bg-white lg:flex dark:border-ink-800 dark:bg-ink-900">
+            <aside class="no-print sticky top-0 hidden h-dvh flex-col border-r border-ink-200 bg-white lg:flex dark:border-ink-800 dark:bg-ink-900">
                 <Brand/>
-                <nav class="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Navigasi utama">
-                    {NAV
-                        .iter()
-                        .map(|item| {
-                            let href = item.href;
-                            view! {
-                                <A
-                                    href=href
-                                    attr:class=move || {
-                                        format!(
-                                            "group flex items-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors {}",
-                                            if is_active(href) {
-                                                "bg-bmn-50 text-bmn-700 font-semibold dark:bg-bmn-900/40 dark:text-bmn-200"
-                                            } else {
-                                                "text-ink-600 hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-800"
-                                            },
-                                        )
-                                    }
-                                >
-                                    <span class="text-lg leading-6" aria-hidden="true">{item.icon}</span>
-                                    <span class="min-w-0">
-                                        <span class="block truncate">{item.label}</span>
-                                        <span class="block truncate text-xs font-normal text-ink-400">
-                                            {item.desc}
-                                        </span>
-                                    </span>
-                                </A>
-                            }
-                        })
-                        .collect_view()}
-                </nav>
+                <Menu is_active=is_active/>
                 <SidebarFooter/>
             </aside>
 
             <div class="flex min-w-0 flex-col">
-                <header class="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-200 bg-white/85 px-3 py-2.5 backdrop-blur-md lg:px-6 dark:border-ink-800 dark:bg-ink-900/85">
+                <header class="no-print sticky top-0 z-30 flex items-center gap-3 border-b border-ink-200 bg-white/85 px-3 py-2.5 backdrop-blur-md lg:px-6 dark:border-ink-800 dark:bg-ink-900/85">
                     <button
                         type="button"
                         class="btn-ghost px-2.5 py-2 lg:hidden"
@@ -133,7 +107,7 @@ pub fn AppShell(children: Children) -> impl IntoView {
                     <div class="min-w-0 flex-1">
                         <h1 class="truncate text-sm font-semibold sm:text-base">{move || title_for(&pathname())}</h1>
                         <p class="hidden truncate text-xs text-ink-400 sm:block">
-                            "Sistem Layanan Data Kementerian Keuangan — SIMAN v2 · Kejaksaan RI"
+                            "Barang Milik Negara Kejaksaan RI · sumber data SLDK SIMAN v2"
                         </p>
                     </div>
                     <ThemeToggle/>
@@ -161,36 +135,60 @@ pub fn AppShell(children: Children) -> impl IntoView {
                 ></div>
                 <div class="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-white shadow-xl dark:bg-ink-900">
                     <Brand/>
-                    <nav class="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Navigasi utama">
-                        {NAV
-                            .iter()
-                            .map(|item| {
-                                let href = item.href;
-                                view! {
-                                    <A
-                                        href=href
-                                        attr:class=move || {
-                                            format!(
-                                                "flex items-center gap-3 rounded-lg px-3 py-3 text-sm {}",
-                                                if is_active(href) {
-                                                    "bg-bmn-50 text-bmn-700 font-semibold dark:bg-bmn-900/40 dark:text-bmn-200"
-                                                } else {
-                                                    "text-ink-600 dark:text-ink-300"
-                                                },
-                                            )
-                                        }
-                                    >
-                                        <span aria-hidden="true">{item.icon}</span>
-                                        {item.label}
-                                    </A>
-                                }
-                            })
-                            .collect_view()}
-                    </nav>
+                    <Menu is_active=is_active/>
                     <SidebarFooter/>
                 </div>
             </div>
         </Show>
+    }
+}
+
+/// Daftar menu berkelompok; dipakai sidebar desktop dan laci seluler.
+#[component]
+fn Menu(is_active: Callback<&'static str, bool>) -> impl IntoView {
+    view! {
+        <nav class="flex-1 space-y-4 overflow-y-auto p-3" aria-label="Navigasi utama">
+            {NAV
+                .iter()
+                .map(|(kelompok, butir)| {
+                    view! {
+                        <div>
+                            <p class="px-3 pb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-ink-400">
+                                {*kelompok}
+                            </p>
+                            <ul class="space-y-0.5">
+                                {butir
+                                    .iter()
+                                    .map(|it| {
+                                        let href = it.href;
+                                        view! {
+                                            <li>
+                                                <A
+                                                    href=href
+                                                    attr:class=move || {
+                                                        format!(
+                                                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors {}",
+                                                            if is_active.run(href) {
+                                                                "bg-bmn-50 text-bmn-700 font-semibold dark:bg-bmn-900/40 dark:text-bmn-200"
+                                                            } else {
+                                                                "text-ink-600 hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-800"
+                                                            },
+                                                        )
+                                                    }
+                                                >
+                                                    <span class="w-5 text-center" aria-hidden="true">{it.icon}</span>
+                                                    <span class="truncate">{it.label}</span>
+                                                </A>
+                                            </li>
+                                        }
+                                    })
+                                    .collect_view()}
+                            </ul>
+                        </div>
+                    }
+                })
+                .collect_view()}
+        </nav>
     }
 }
 
@@ -279,12 +277,12 @@ fn set_web_theme(dark: bool) {
 }
 
 fn title_for(path: &str) -> &'static str {
-    match path {
-        "/laporan" => "Laporan Bulanan",
-        "/kategori" => "Kategori Aset",
-        "/data" => "Data Aset",
-        "/sinkronisasi" => "Sinkronisasi Data",
-        "/pengaturan" => "Pengaturan Koneksi",
-        _ => "Ringkasan Dasbor",
+    if path.starts_with("/satker/") {
+        return "Rincian Satuan Kerja";
     }
+    NAV.iter()
+        .flat_map(|(_, butir)| butir.iter())
+        .find(|it| it.href == path)
+        .map(|it| it.label)
+        .unwrap_or("Dasbor BMN")
 }
