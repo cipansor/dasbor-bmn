@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::components::ui::{Badge, ErrorBlock, LoadingBlock, SectionCard};
+use crate::components::ui::{Badge, ErrorBlock, KepalaHalaman, LoadingBlock, SectionCard};
 use crate::model::ConnInfo;
 use crate::server_fns::{get_asumsi, get_conn_info, save_asumsi, save_conn_config};
 
@@ -53,6 +53,10 @@ fn SettingsBody(
     };
 
     view! {
+        <KepalaHalaman
+            judul="Pengaturan"
+            uraian="Kredensial Web Service SLDK dan asumsi yang dipakai mesin analitik. Rahasia hanya tersimpan di server."
+        />
         <div class="space-y-4">
             <SectionCard
                 title="Status Koneksi"

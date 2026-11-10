@@ -120,21 +120,21 @@ fn Daftar(data: Vec<SatkerBaris>) -> impl IntoView {
                 {move || format!("Menampilkan {} satuan kerja.", format_number(tersaring.get().len() as i64))}
             </p>
             <div class="table-wrap max-h-[75vh] overflow-y-auto rounded-lg border border-ink-200 dark:border-ink-800">
-                <table class="w-full min-w-[68rem] text-left text-xs">
+                <table class="w-full min-w-[76rem] text-left text-xs">
                     <thead class="sticky top-0 z-10 bg-ink-50 text-ink-600 dark:bg-ink-900 dark:text-ink-300">
                         <tr>
                             <th scope="col" class="px-3 py-2 font-semibold">"#"</th>
                             <th scope="col" class="px-3 py-2 font-semibold">"Satuan kerja"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Unit"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Nilai"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Baik"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Rusak berat"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Habis MM"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Idle"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold">"Hilang"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold" title="Ekspektasi rusak berat baru dalam 5 tahun">"RB baru 5 th"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold" title="Kebutuhan skenario moderat termasuk tunggakan">"Kebutuhan 5 th"</th>
-                            <th scope="col" class="px-3 py-2 text-right font-semibold" title="Rasio Kerusakan terstandar Umur">"RKU"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Unit"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Nilai"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Baik"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Rusak berat"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Habis MM"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Idle"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold">"Hilang"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold" title="Ekspektasi rusak berat baru dalam 5 tahun">"RB baru 5 th"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold" title="Kebutuhan skenario moderat termasuk tunggakan">"Kebutuhan 5 th"</th>
+                            <th scope="col" class="whitespace-nowrap px-3 py-2 text-right font-semibold" title="Rasio Kerusakan terstandar Umur">"RKU"</th>
                             <th scope="col" class="px-3 py-2 font-semibold">"Skor"</th>
                         </tr>
                     </thead>
@@ -152,16 +152,16 @@ fn Daftar(data: Vec<SatkerBaris>) -> impl IntoView {
                                                 <a class="font-medium text-bmn-700 hover:underline dark:text-bmn-300" href=format!("/satker/{}", s.kode)>{s.nama.clone()}</a>
                                                 <span class="block text-[0.7rem] text-ink-500 dark:text-ink-400">{format!("{} · {}", s.prov, s.kode)}</span>
                                             </td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_number(s.unit)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_rupiah_short(s.nilai)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_persen(s.pct_baik)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_number(s.rb)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format!("{} ({})", format_number(s.habis), format_persen(s.pct_habis))}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_number(s.idle)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_number(s.hilang)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format_unit(s.rb5)}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format!("{} unit · {}", format_unit(s.ganti5), format_rupiah_short(s.biaya5))}</td>
-                                            <td class="px-3 py-2 text-right tabular-nums">{format!("{}×", format_desimal(s.rku, 2))}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_number(s.unit)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_rupiah_short(s.nilai)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_persen(s.pct_baik)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_number(s.rb)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format!("{} ({})", format_number(s.habis), format_persen(s.pct_habis))}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_number(s.idle)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_number(s.hilang)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format_unit(s.rb5)}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format!("{} unit · {}", format_unit(s.ganti5), format_rupiah_short(s.biaya5))}</td>
+                                            <td class="whitespace-nowrap px-3 py-2 text-right tabular-nums">{format!("{}×", format_desimal(s.rku, 2))}</td>
                                             <td class="px-3 py-2"><LencanaSkor skor=s.skor/></td>
                                         </tr>
                                     }

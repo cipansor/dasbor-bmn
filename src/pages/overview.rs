@@ -63,7 +63,7 @@ fn isi(a: Analisis) -> AnyView {
         .map(|s| {
             (
                 s.nama.clone(),
-                100.0 - s.skor,
+                s.skor,
                 format!(
                     "skor {} · RB {}",
                     format_desimal(s.skor, 1),
@@ -295,8 +295,8 @@ fn isi(a: Analisis) -> AnyView {
         </div>
 
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
-            <SectionCard title="Satuan Kerja Perlu Perhatian" subtitle="skor kesehatan terendah">
-                <BarList data=perhatian warna=W_RB/>
+            <SectionCard title="Satuan Kerja Perlu Perhatian" subtitle="skor kesehatan terendah · batang = skor dari 100">
+                <BarList data=perhatian warna=W_RB skala=100.0/>
                 <a class="no-print btn-ghost mt-3" href="/satker">"Lihat seluruh satuan kerja →"</a>
             </SectionCard>
             <SectionCard title="Provinsi dengan Nilai Aset Terbesar" subtitle="10 teratas">

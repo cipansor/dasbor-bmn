@@ -84,6 +84,7 @@ fn isi(a: Analisis) -> AnyView {
         })
         .collect();
 
+    let rb_teratas: Vec<_> = a.aset_rb.iter().take(15).cloned().collect();
     let model = StoredValue::new(a.model.clone());
     let (pilih, set_pilih) = signal(0usize);
     let pilihan: Vec<(usize, String)> = a
@@ -173,7 +174,7 @@ fn isi(a: Analisis) -> AnyView {
 
         <div class="mt-4">
             <SectionCard title="Aset Rusak Berat Bernilai Terbesar" subtitle="calon utama usulan penghapusan/penggantian">
-                <TabelAset aset=a.aset_rb.clone() dengan_peluang=false/>
+                <TabelAset aset=rb_teratas dengan_peluang=false/>
             </SectionCard>
         </div>
     }

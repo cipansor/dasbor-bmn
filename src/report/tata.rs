@@ -133,7 +133,14 @@ impl Penulis {
     pub fn butir(&mut self, warna: &str, awalan: &str, isi: &str) {
         let ukuran = 8.8;
         let tinggi = ukuran * 1.42;
-        let baris = bungkus(&format!("{awalan} {isi}"), LEBAR - 14.0, ukuran, false);
+        // Awalan dicetak tebal (lebih lebar); kurangi lebar bungkus sebesar selisihnya.
+        let selisih = lebar_teks(awalan, ukuran, true) - lebar_teks(awalan, ukuran, false);
+        let baris = bungkus(
+            &format!("{awalan} {isi}"),
+            LEBAR - 14.0 - selisih.max(0.0),
+            ukuran,
+            false,
+        );
         self.pastikan(tinggi * baris.len().min(3) as f64);
         for (i, b) in baris.iter().enumerate() {
             self.pastikan(tinggi);

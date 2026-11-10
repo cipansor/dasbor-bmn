@@ -139,7 +139,9 @@ fn isi(a: Analisis) -> AnyView {
                             let metode = d.metode.clone();
                             let g = galat(&d);
                             view! {
-                                <GrafikRamal riwayat=d.riwayat ramal=d.ramal satuan={if pakai_rupiah { "rupiah" } else { "unit" }}/>
+                                <div class="mx-auto max-w-4xl">
+                                    <GrafikRamal riwayat=d.riwayat ramal=d.ramal satuan={if pakai_rupiah { "rupiah" } else { "unit" }}/>
+                                </div>
                                 <p class="mt-2 text-xs text-ink-600 dark:text-ink-300">
                                     {format!("{} — metode terpilih: {metode}; galat uji balik (sMAPE) {g}.", p.label)}
                                 </p>

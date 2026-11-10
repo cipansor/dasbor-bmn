@@ -454,12 +454,17 @@ pub fn GrafikKurva(titik: Vec<TitikKurva>) -> impl IntoView {
             penanda: false,
         },
     ];
+    // Skala mengikuti data agar kurva kategori berumur panjang tetap terbaca.
+    let puncak = garis
+        .iter()
+        .flat_map(|g| g.titik.iter().map(|p| p.1))
+        .fold(0.0_f64, f64::max);
     let svg = svg_garis(
         &garis,
         &[],
         &|v| format!("{v:.0}%"),
         &|x| format!("{x:.0} th"),
-        Some(100.0),
+        Some(batas_bulat(puncak.max(5.0)).min(100.0)),
     );
     view! {
         <div>
@@ -484,9 +489,9 @@ pub fn GrafikTren(titik: Vec<(i32, f64)>, satuan: &'static str) -> impl IntoView
 pub fn Donut(data: Vec<(String, f64)>, label_pusat: String, nilai_pusat: String) -> impl IntoView {
     let (svg, legenda) = svg_donut(&data, &label_pusat, &nilai_pusat);
     view! {
-        <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+        <div class="flex flex-col items-center gap-4">
             <div class="shrink-0" inner_html=svg></div>
-            <ul class="w-full min-w-0 space-y-1.5">
+            <ul class="grid w-full min-w-0 gap-x-4 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-1">
                 {legenda
                     .into_iter()
                     .map(|(nama, pct, warna)| {
@@ -510,8 +515,10 @@ pub fn BarList(
     /// (nama, nilai, teks nilai, tautan opsional).
     data: Vec<(String, f64, String, Option<String>)>,
     #[prop(default = W_UTAMA)] warna: &'static str,
+    /// Nilai yang mengisi batang penuh; bawaan = nilai terbesar pada data.
+    #[prop(optional)] skala: Option<f64>,
 ) -> impl IntoView {
-    let maks = data.iter().map(|d| d.1).fold(0.0_f64, f64::max);
+    let maks = skala.unwrap_or_else(|| data.iter().map(|d| d.1).fold(0.0_f64, f64::max));
     view! {
         <ul class="space-y-2.5">
             {data

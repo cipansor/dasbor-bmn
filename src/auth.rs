@@ -436,9 +436,37 @@ fn halaman_masuk(pesan: Option<&str>) -> String {
     )
 }
 
+/// Kepala keamanan bawaan untuk setiap respons.
+///
+/// Dasbor memuat data berklasifikasi Terbatas: halaman tidak boleh dibingkai
+/// situs lain (clickjacking), tipe konten tidak boleh ditebak peramban, dan
+/// halaman maupun jawaban API tidak boleh tersimpan di tembolok bersama.
+fn kepala_keamanan(res: &mut Response, path: &str) {
+    let h = res.headers_mut();
+    h.insert(
+        header::X_CONTENT_TYPE_OPTIONS,
+        HeaderValue::from_static("nosniff"),
+    );
+    h.insert(header::X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
+    h.insert(
+        header::REFERRER_POLICY,
+        HeaderValue::from_static("no-referrer"),
+    );
+    // Aset statis bernama tetap boleh disimpan peramban pengguna itu sendiri.
+    if !path.starts_with("/pkg/") && !h.contains_key(header::CACHE_CONTROL) {
+        h.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-store"));
+    }
+}
+
 /// Middleware: gerbang tunggal untuk seluruh permintaan.
 pub async fn gerbang(req: Request, next: Next) -> Response {
     let path = req.uri().path().to_string();
+    let mut res = gerbang_dalam(req, next, &path).await;
+    kepala_keamanan(&mut res, &path);
+    res
+}
+
+async fn gerbang_dalam(req: Request, next: Next, path: &str) -> Response {
 
     if JALAN_BEBAS.iter().any(|p| path == *p) {
         return next.run(req).await;
@@ -749,6 +777,22 @@ mod tests {
         assert_eq!(buat("198.51.100.9:4000", Some("1.2.3.4")), "198.51.100.9");
         assert_eq!(buat("198.51.100.9:4000", Some("9.9.9.9")), "198.51.100.9");
         assert_eq!(buat("198.51.100.9:4000", None), "198.51.100.9");
+    }
+
+    #[test]
+    fn respons_diberi_kepala_keamanan() {
+        let mut res = Response::new(Body::empty());
+        kepala_keamanan(&mut res, "/satker");
+        let h = res.headers();
+        assert_eq!(h[header::X_FRAME_OPTIONS], "DENY");
+        assert_eq!(h[header::X_CONTENT_TYPE_OPTIONS], "nosniff");
+        assert_eq!(h[header::REFERRER_POLICY], "no-referrer");
+        assert_eq!(h[header::CACHE_CONTROL], "no-store");
+        // Aset statis tidak dipaksa tanpa tembolok.
+        let mut aset = Response::new(Body::empty());
+        kepala_keamanan(&mut aset, "/pkg/dasbor-bmn.css");
+        assert!(!aset.headers().contains_key(header::CACHE_CONTROL));
+        assert_eq!(aset.headers()[header::X_FRAME_OPTIONS], "DENY");
     }
 
     #[test]

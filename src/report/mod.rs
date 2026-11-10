@@ -345,19 +345,19 @@ fn tabel_skenario(w: &mut Penulis, r: &Ringkas, m: &Meta) {
 }
 
 fn daftar_aset(w: &mut Penulis, aset: &[AsetRisiko], dengan_satker: bool, dengan_peluang: bool) {
-    let mut kol = vec![kiri("Aset", 3.2), kiri("Kategori", 1.8)];
+    let mut kol = vec![kiri("Aset", 3.0), kiri("Kategori", 1.7)];
     if dengan_satker {
         kol.push(kiri("Satuan kerja", 2.6));
     }
     kol.extend([
-        kanan("Tahun", 0.8),
-        kanan("Umur", 0.8),
-        kiri("Kondisi", 1.3),
-        kanan("Sisa umur", 0.9),
-        kanan("Nilai", 1.3),
+        kanan("Tahun", 0.75),
+        kanan("Umur (th)", 1.0),
+        kiri("Kondisi", 1.25),
+        kanan("Sisa (th)", 0.95),
+        kanan("Nilai", 1.2),
     ]);
     if dengan_peluang {
-        kol.push(kanan("Peluang RB", 1.1));
+        kol.push(kanan("Peluang RB", 1.25));
     }
     let baris: Vec<Vec<String>> = aset
         .iter()
@@ -457,7 +457,6 @@ pub fn bangun_nasional(
     }
 
     // 2. Sorotan dan rekomendasi.
-    w.halaman_baru();
     w.bab("Sorotan Utama", Some("temuan terpenting dari data"));
     for s in &a.sorotan {
         w.butir(warna_nada(&s.nada), &format!("{}.", s.judul), &s.isi);
@@ -468,7 +467,6 @@ pub fn bangun_nasional(
     }
 
     // 3. Kondisi dan masa manfaat.
-    w.halaman_baru();
     w.bab("Kondisi dan Masa Manfaat", Some("per kategori"));
     let baris: Vec<Vec<String>> = a
         .kategori
@@ -547,7 +545,6 @@ pub fn bangun_nasional(
     );
 
     // 4. Prediksi lima tahun.
-    w.halaman_baru();
     w.bab("Prediksi Lima Tahun", Some(&format!("sampai akhir {akhir}")));
     grafik_proyeksi(&mut w, r, m);
     w.sub("Jadwal habis masa manfaat per kategori (unit)");
@@ -603,10 +600,10 @@ pub fn bangun_nasional(
         None,
     );
     w.sub("Aset paling berisiko menjadi rusak berat");
-    daftar_aset(&mut w, &a.aset_risiko, true, true);
+    let risiko: Vec<AsetRisiko> = a.aset_risiko.iter().take(15).cloned().collect();
+    daftar_aset(&mut w, &risiko, true, true);
 
     // 5. Analisis kebutuhan.
-    w.halaman_baru();
     w.bab("Analisis Kebutuhan Lima Tahun", Some("penggantian dan rehabilitasi aset yang ada"));
     let per_tahun = r.biaya_total(1) / HORIZON as f64;
     w.paragraf(&format!(
@@ -705,7 +702,6 @@ pub fn bangun_nasional(
     ));
 
     // 6. Forecast perolehan.
-    w.halaman_baru();
     w.bab("Forecast Perolehan", Some("bila pola historis berlanjut"));
     if let Some(total) = a.prakiraan.first() {
         w.sub("Jumlah unit perolehan per tahun - seluruh kategori");
@@ -770,7 +766,6 @@ pub fn bangun_nasional(
     }
 
     // 7. Wilayah.
-    w.halaman_baru();
     w.bab("Sebaran per Provinsi", Some("menurut lokasi aset, urut nilai"));
     w.tabel(
         &[
@@ -999,14 +994,12 @@ pub fn bangun_satker(s: &SatkerRinci, periode: &Periode) -> Vec<u8> {
     );
 
     if !s.rekomendasi.is_empty() {
-        w.halaman_baru();
-        w.bab("Rekomendasi Tindak Lanjut", Some("urut prioritas"));
+            w.bab("Rekomendasi Tindak Lanjut", Some("urut prioritas"));
         for (i, x) in s.rekomendasi.iter().enumerate() {
             w.rekomendasi(i + 1, x);
         }
     }
 
-    w.halaman_baru();
     w.bab("Prediksi dan Kebutuhan Lima Tahun", Some(&format!("sampai akhir {akhir}")));
     grafik_proyeksi(&mut w, r, m);
     w.sub("Kebutuhan per skenario (unit)");

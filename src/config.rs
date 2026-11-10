@@ -202,5 +202,8 @@ pub fn data_dir() -> std::path::PathBuf {
     let dir = env_any(&["SIMAN_DATA_DIR"]).unwrap_or_else(|| "data".to_string());
     let p = std::path::PathBuf::from(dir);
     let _ = std::fs::create_dir_all(&p);
+    // Direktori memuat data BMN berklasifikasi Terbatas dan kredensial.
+    static SEKALI: std::sync::Once = std::sync::Once::new();
+    SEKALI.call_once(|| crate::fs_aman::rapatkan_dir(&p));
     p
 }
