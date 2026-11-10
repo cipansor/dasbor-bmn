@@ -38,6 +38,13 @@ pub struct FileConfig {
     pub grant_type: String,
     #[serde(default)]
     pub ba_key: String,
+    /// Asumsi analitik yang diubah lewat halaman Pengaturan.
+    #[serde(default)]
+    pub eskalasi: Option<f64>,
+    #[serde(default)]
+    pub faktor_rehab: Option<f64>,
+    #[serde(default)]
+    pub satuan_umur_sisa: Option<String>,
 }
 
 #[cfg(feature = "ssr")]
@@ -144,6 +151,49 @@ impl Config {
             format!("{base}/gateway")
         }
     }
+}
+
+#[cfg(feature = "ssr")]
+fn satuan_sah(s: &str) -> Option<String> {
+    let t = s.trim().to_lowercase();
+    matches!(t.as_str(), "tahun" | "semester" | "bulan").then_some(t)
+}
+
+/// Asumsi analitik aktif: berkas konfigurasi, lalu environment, lalu bawaan.
+#[cfg(feature = "ssr")]
+pub fn asumsi() -> crate::dto::Asumsi {
+    let file = read_file_config();
+    let bawaan = crate::dto::Asumsi::default();
+    let angka = |env: &str| env_any(&[env]).and_then(|v| crate::model::parse_angka(&v));
+    crate::dto::Asumsi {
+        eskalasi: file
+            .eskalasi
+            .or_else(|| angka("BMN_ESKALASI_HARGA"))
+            .filter(|x| (0.0..=0.25).contains(x))
+            .unwrap_or(bawaan.eskalasi),
+        faktor_rehab: file
+            .faktor_rehab
+            .or_else(|| angka("BMN_FAKTOR_REHAB"))
+            .filter(|x| (0.05..=1.5).contains(x))
+            .unwrap_or(bawaan.faktor_rehab),
+        satuan_umur_sisa: file
+            .satuan_umur_sisa
+            .as_deref()
+            .and_then(satuan_sah)
+            .or_else(|| env_any(&["BMN_SATUAN_UMUR_SISA"]).as_deref().and_then(satuan_sah))
+            .unwrap_or(bawaan.satuan_umur_sisa),
+    }
+}
+
+/// Simpan asumsi analitik ke berkas konfigurasi.
+#[cfg(feature = "ssr")]
+pub fn simpan_asumsi(a: &crate::dto::Asumsi) -> std::io::Result<()> {
+    let path = config_path();
+    let mut current = read_file_config();
+    current.eskalasi = Some(a.eskalasi.clamp(0.0, 0.25));
+    current.faktor_rehab = Some(a.faktor_rehab.clamp(0.05, 1.5));
+    current.satuan_umur_sisa = satuan_sah(&a.satuan_umur_sisa);
+    crate::fs_aman::tulis_privat(&path, serde_json::to_string_pretty(&current)?.as_bytes())
 }
 
 /// Data direktori penyimpanan lokal (cache & konfigurasi).

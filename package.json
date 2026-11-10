@@ -1,0 +1,12 @@
+{
+  "name": "dasbor-bmn-css",
+  "private": true,
+  "description": "Perkakas pembangun CSS (Tailwind v4) untuk Dasbor BMN. Bukan dependensi runtime.",
+  "scripts": {
+    "css": "tailwindcss -i style/tailwind.css -o target/site/pkg/dasbor-bmn.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.1.14",
+    "tailwindcss": "4.1.14"
+  }
+}
