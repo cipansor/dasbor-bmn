@@ -1,46 +1,38 @@
 //! Penggambar grafik vektor untuk laporan PDF.
 //!
-//! Bentuk visual mengikuti komponen SVG pada dasbor (donut, area, bar, kartu KPI)
-//! agar laporan terasa satu bahasa desain dengan aplikasi.
+//! Bahasa visual mengikuti dasbor: warna kondisi tetap (hijau/kuning/merah),
+//! sumbu berangka bulat, dan panjang batang selalu sebanding dengan nilai yang
+//! tertulis di sampingnya.
 
 #![cfg(feature = "ssr")]
 
 use super::pdf::{lebar_teks, Page};
-use crate::model::{format_number, format_rupiah_short};
-
-/// Palet seragam dengan grafik di web.
-pub const PALETTE: &[&str] = &[
-    "#1f47f5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6",
-    "#f97316", "#6366f1", "#84cc16", "#06b6d4",
-];
+use crate::components::chart::batas_bulat;
+use crate::dto::RamalTitik;
 
 /// Warna garis bantu dan latar netral.
 pub const GARIS: &str = "#d7dced";
 pub const TRACK: &str = "#e8ebf5";
+pub const TINTA: &str = "#0f172a";
+pub const TEKS: &str = "#334155";
+pub const REDUP: &str = "#64748b";
+pub const UTAMA: &str = "#1f47f5";
+pub const C_BAIK: &str = "#10b981";
+pub const C_RR: &str = "#f59e0b";
+pub const C_RB: &str = "#ef4444";
+pub const C_TAK: &str = "#94a3b8";
+pub const C_UNGU: &str = "#8b5cf6";
+pub const C_BIRU2: &str = "#0ea5e9";
 
-pub fn warna_ke(i: usize) -> &'static str {
-    PALETTE[i % PALETTE.len()]
-}
-
-fn warna_tone(tone: &str) -> &'static str {
+pub fn warna_tone(tone: &str) -> &'static str {
     match tone {
-        "emerald" => "#10b981",
-        "amber" => "#f59e0b",
-        "rose" => "#ef4444",
-        "violet" => "#8b5cf6",
-        _ => "#1f47f5",
+        "emerald" | "green" => C_BAIK,
+        "amber" => C_RR,
+        "rose" | "red" => C_RB,
+        "violet" => C_UNGU,
+        "slate" => C_TAK,
+        _ => UTAMA,
     }
-}
-
-/// Judul bagian dengan garis aksen di kiri.
-pub fn judul_bagian(p: &mut Page, x: f64, y: f64, w: f64, judul: &str, sub: Option<&str>) {
-    p.kotak(x, y, 3.5, 14.0, "#1f47f5");
-    p.teks(x + 10.0, y + 10.5, 11.5, true, "#0f172a", judul);
-    if let Some(s) = sub {
-        let lw = lebar_teks(judul, 11.5, true);
-        p.teks(x + 16.0 + lw, y + 10.5, 8.5, false, "#8b93a7", s);
-    }
-    p.garis(x, y + 19.0, x + w, y + 19.0, GARIS, 0.8);
 }
 
 /// Kartu KPI: label kecil, nilai besar, keterangan, dan pita warna di tepi.
@@ -59,279 +51,211 @@ pub fn kartu_kpi(
     p.kotak(x, y, w, h, "#f6f8fd");
     p.kotak_tepi(x, y, w, h, GARIS, 0.7);
     p.kotak(x, y, 3.0, h, warna_tone(tone));
-    p.teks(
-        x + 11.0,
-        y + 14.0,
-        7.5,
-        true,
-        "#8b93a7",
-        &label.to_uppercase(),
-    );
-    let uk = if lebar_teks(nilai, 16.0, true) > w - 22.0 {
-        12.5
+    p.teks(x + 10.0, y + 13.0, 6.8, true, REDUP, &label.to_uppercase());
+    let uk = if lebar_teks(nilai, 15.0, true) > w - 18.0 {
+        11.5
     } else {
-        16.0
+        15.0
     };
-    p.teks(x + 11.0, y + 33.0, uk, true, "#0f172a", nilai);
-    p.teks(x + 11.0, y + 47.0, 7.5, false, "#8b93a7", hint);
-}
-
-/// Donut komposisi dengan legenda berkolom.
-pub fn donut(
-    p: &mut Page,
-    cx: f64,
-    cy: f64,
-    r: f64,
-    tebal_ring: f64,
-    data: &[(String, f64)],
-    label_pusat: &str,
-    nilai_pusat: &str,
-) {
-    let total: f64 = data.iter().map(|(_, v)| *v).sum();
-    let r_dalam = r - tebal_ring;
-    let r_tengah = (r + r_dalam) / 2.0;
-    let mut mulai = -std::f64::consts::FRAC_PI_2;
-    let tai = 2.0 * std::f64::consts::PI;
-
-    // Cincin latar, tampak bila ada kategori bernilai nol.
-    p.jalur_mulai(cx, cy - r);
-    p.jalur_busur(cx, cy, r, r, -std::f64::consts::FRAC_PI_2, tai);
-    p.jalur_ke(cx, cy - r_dalam);
-    p.jalur_busur(cx, cy, r_dalam, r_dalam, -std::f64::consts::FRAC_PI_2, -tai);
-    p.jalur_tutup();
-    p.jalur_isi(TRACK);
-
-    for (i, (_, v)) in data.iter().enumerate() {
-        if total <= 0.0 || *v <= 0.0 {
-            continue;
-        }
-        let bagi = (*v / total) * tai;
-        let akhir = mulai + bagi;
-        p.jalur_mulai(cx + r * mulai.cos(), cy + r * mulai.sin());
-        p.jalur_busur(cx, cy, r, r, mulai, bagi);
-        p.jalur_ke(cx + r_dalam * akhir.cos(), cy + r_dalam * akhir.sin());
-        p.jalur_busur(cx, cy, r_dalam, r_dalam, akhir, -bagi);
-        p.jalur_tutup();
-        p.jalur_isi(warna_ke(i));
-        mulai = akhir;
-    }
-
-    p.teks_tengah(
-        cx,
-        cy - 9.0,
-        7.0,
-        true,
-        "#8b93a7",
-        &label_pusat.to_uppercase(),
+    p.teks(x + 10.0, y + 31.0, uk, true, TINTA, nilai);
+    p.teks(
+        x + 10.0,
+        y + 44.0,
+        6.8,
+        false,
+        REDUP,
+        &Page::potong(hint, w - 16.0, 6.8, false),
     );
-    p.teks_tengah(cx, cy + 12.0, 12.5, true, "#0f172a", nilai_pusat);
-
-    // Legenda di sebelah kanan donut.
-    let lx = cx + r + 26.0;
-    let mut ly = cy - r + 4.0;
-    for (i, (label, v)) in data.iter().enumerate() {
-        let pct = if total > 0.0 { v / total * 100.0 } else { 0.0 };
-        p.kotak(lx, ly - 5.5, 7.0, 7.0, warna_ke(i));
-        let nama = Page::potong(label, 150.0, 8.5, false);
-        p.teks(lx + 12.0, ly, 8.5, false, "#334155", &nama);
-        p.teks_kanan(lx + 236.0, ly, 8.5, true, "#0f172a", &format!("{pct:.1}%"));
-        ly += 16.0;
-    }
-    let _ = r_tengah;
 }
 
-/// Diagram area dengan sumbu, grid, dan label tahun untuk tren perolehan.
-pub fn area(
+/// Satu seri diagram kolom.
+pub struct SeriPdf<'a> {
+    pub nama: &'a str,
+    pub warna: &'static str,
+    pub nilai: Vec<f64>,
+}
+
+/// Diagram kolom bertumpuk dengan sumbu, total di atas kolom, garis acuan, dan legenda.
+#[allow(clippy::too_many_arguments)]
+pub fn kolom(
     p: &mut Page,
     x: f64,
     y: f64,
     w: f64,
     h: f64,
-    titik: &[crate::model::TrendPoint],
-    nilai_rupiah: bool,
+    label: &[String],
+    seri: &[SeriPdf<'_>],
+    fmt: &dyn Fn(f64) -> String,
+    acuan: Option<(f64, &str)>,
 ) {
-    if titik.len() < 2 {
-        p.teks(
-            x,
-            y + h / 2.0,
-            9.0,
-            false,
-            "#8b93a7",
-            "Data tren belum cukup untuk digambar.",
-        );
-        return;
-    }
-    let pad_kiri = 52.0;
-    let pad_bawah = 22.0;
-    let pad_atas = 10.0;
-    let pw = w - pad_kiri - 8.0;
-    let ph = h - pad_atas - pad_bawah;
-    let x0 = x + pad_kiri;
-    let y0 = y + pad_atas;
-
-    let nilai = |t: &crate::model::TrendPoint| {
-        if nilai_rupiah {
-            t.nilai
-        } else {
-            t.jumlah as f64
-        }
-    };
-    let maks = titik.iter().map(nilai).fold(0.0_f64, f64::max).max(1.0);
-    let n = titik.len() as f64;
-
-    // Grid mendatar + label nilai.
-    for i in 0..=4 {
-        let gy = y0 + ph - (i as f64 / 4.0) * ph;
-        p.garis(x0, gy, x0 + pw, gy, GARIS, 0.6);
-        let v = maks * (i as f64 / 4.0);
-        let teks = if nilai_rupiah {
-            format_rupiah_short(v)
-        } else {
-            format_number(v.round() as i64)
-        };
-        p.teks_kanan(x0 - 6.0, gy + 3.0, 7.0, false, "#8b93a7", &teks);
-    }
-
-    let xy: Vec<(f64, f64)> = titik
-        .iter()
-        .enumerate()
-        .map(|(i, t)| {
-            let px = x0 + (i as f64 / (n - 1.0)) * pw;
-            let py = y0 + ph - (nilai(t) / maks) * ph;
-            (px, py)
+    let kiri = 46.0;
+    let atas = 14.0;
+    let bawah = if seri.len() > 1 { 30.0 } else { 16.0 };
+    let n = label.len().max(1);
+    let total: Vec<f64> = (0..n)
+        .map(|i| {
+            seri.iter()
+                .map(|s| s.nilai.get(i).copied().unwrap_or(0.0).max(0.0))
+                .sum()
         })
         .collect();
-
-    // Area terisi sebagai poligon tertutup ke garis alas.
-    let mut area_pts: Vec<(f64, f64)> = Vec::with_capacity(xy.len() + 2);
-    area_pts.push((x0, y0 + ph));
-    area_pts.extend(xy.iter().copied());
-    area_pts.push((x0 + pw, y0 + ph));
-    p.poligon(&area_pts, "#dbe3fb");
-
-    p.garis_poli(&xy, "#1f47f5", 2.0);
-    for (i, (px, py)) in xy.iter().enumerate() {
-        p.kotak(px - 2.0, py - 2.0, 4.0, 4.0, "#ffffff");
-        p.kotak_tepi(px - 2.0, py - 2.0, 4.0, 4.0, "#1f47f5", 1.2);
-        // Label tahun: semua bila sedikit, sebaliknya tiap beberapa titik.
-        let langkah = (titik.len() / 9).max(1);
-        if i % langkah == 0 || i == titik.len() - 1 {
-            p.teks_tengah(
-                *px,
-                y + h - 6.0,
-                7.0,
-                false,
-                "#8b93a7",
-                &titik[i].year.to_string(),
-            );
+    let maks = total
+        .iter()
+        .copied()
+        .fold(acuan.map(|a| a.0).unwrap_or(0.0), f64::max);
+    let puncak = batas_bulat(maks);
+    let pw = w - kiri - 6.0;
+    let ph = h - atas - bawah;
+    let x0 = x + kiri;
+    let y0 = y + atas;
+    let py = |v: f64| y0 + ph - (v / puncak).clamp(0.0, 1.0) * ph;
+    for i in 0..=4 {
+        let v = puncak * i as f64 / 4.0;
+        p.garis(x0, py(v), x0 + pw, py(v), GARIS, 0.5);
+        p.teks_kanan(x0 - 5.0, py(v) + 2.5, 6.5, false, REDUP, &fmt(v));
+    }
+    let lebar = pw / n as f64;
+    let batang = (lebar * 0.6).min(46.0);
+    for i in 0..label.len() {
+        let bx = x0 + lebar * i as f64 + (lebar - batang) / 2.0;
+        let mut dasar = 0.0;
+        for s in seri {
+            let v = s.nilai.get(i).copied().unwrap_or(0.0).max(0.0);
+            if v <= 0.0 {
+                continue;
+            }
+            let y1 = py(dasar + v);
+            p.kotak(bx, y1, batang, (py(dasar) - y1).max(0.0), s.warna);
+            dasar += v;
+        }
+        p.teks_tengah(
+            bx + batang / 2.0,
+            py(total[i]) - 3.0,
+            6.8,
+            true,
+            TINTA,
+            &fmt(total[i]),
+        );
+        p.teks_tengah(
+            bx + batang / 2.0,
+            y0 + ph + 10.0,
+            6.8,
+            false,
+            REDUP,
+            &Page::potong(&label[i], lebar - 2.0, 6.8, false),
+        );
+    }
+    if let Some((v, teks)) = acuan {
+        p.putus(true);
+        p.garis(x0, py(v), x0 + pw, py(v), REDUP, 0.9);
+        p.putus(false);
+        p.teks_kanan(x0 + pw, py(v) - 3.0, 6.5, false, REDUP, teks);
+    }
+    if seri.len() > 1 {
+        let mut lx = x0;
+        for s in seri {
+            p.kotak(lx, y + h - 9.0, 6.0, 6.0, s.warna);
+            p.teks(lx + 9.0, y + h - 3.5, 6.8, false, TEKS, s.nama);
+            lx += 16.0 + lebar_teks(s.nama, 6.8, false);
         }
     }
 }
 
-/// Diagram batang horizontal untuk peringkat (provinsi, satker, kondisi).
-pub fn bar_list(
-    p: &mut Page,
-    x: f64,
-    y: f64,
-    w: f64,
-    data: &[(String, i64, f64)],
-    nilai_rupiah: bool,
-    limit: usize,
-) {
-    let maks = data.iter().map(|(_, j, _)| *j).max().unwrap_or(1).max(1);
-    let mut ly = y;
-    for (i, (nama, jumlah, nilai)) in data.iter().take(limit).enumerate() {
-        let val = if nilai_rupiah {
-            format_rupiah_short(*nilai)
-        } else {
-            format_number(*jumlah)
-        };
-        let lebar_teks_val = 78.0;
-        let nama_max = w - lebar_teks_val - 4.0;
-        let nama_tampil = Page::potong(nama, nama_max, 8.0, false);
-        p.teks(x, ly, 8.0, false, "#334155", &nama_tampil);
-        p.teks_kanan(x + w, ly, 8.0, true, "#0f172a", &val);
-        let track_y = ly + 3.5;
-        let track_w = w;
-        p.kotak(x, track_y, track_w, 5.0, TRACK);
-        let pct = (*jumlah as f64 / maks as f64).clamp(0.0, 1.0);
-        p.kotak(x, track_y, (track_w * pct).max(2.0), 5.0, warna_ke(i));
-        ly += 20.0;
-    }
-}
-
-/// Diagram batang vertikal sederhana untuk perbandingan antar kategori.
-pub fn bar_vertikal(
+/// Riwayat tahunan dan prakiraan (garis putus) dengan pita rentang 80%.
+#[allow(clippy::too_many_arguments)]
+pub fn garis_ramal(
     p: &mut Page,
     x: f64,
     y: f64,
     w: f64,
     h: f64,
-    data: &[(String, f64)],
-    nilai_rupiah: bool,
+    riwayat: &[(i32, f64)],
+    ramal: &[RamalTitik],
+    fmt: &dyn Fn(f64) -> String,
 ) {
-    if data.is_empty() {
+    if riwayat.len() < 2 {
+        p.teks(x, y + h / 2.0, 8.5, false, REDUP, "Riwayat belum cukup untuk digambar.");
         return;
     }
-    let pad_bawah = 34.0;
-    let pad_atas = 16.0;
-    let ph = h - pad_bawah - pad_atas;
-    let maks = data
+    let kiri = 46.0;
+    let atas = 8.0;
+    let bawah = 16.0;
+    let x_min = riwayat[0].0 as f64;
+    let x_maks = ramal
+        .last()
+        .map(|r| r.tahun as f64)
+        .unwrap_or(riwayat[riwayat.len() - 1].0 as f64);
+    let maks = riwayat
         .iter()
-        .map(|(_, v)| *v)
-        .fold(0.0_f64, f64::max)
-        .max(1.0);
-    let n = data.len() as f64;
-    let celah = 6.0;
-    let lebar_batang = ((w - celah * (n + 1.0)) / n).max(4.0);
-    for (i, (label, v)) in data.iter().enumerate() {
-        let bx = x + celah + i as f64 * (lebar_batang + celah);
-        let bh = (*v / maks) * ph;
-        let by = y + pad_atas + (ph - bh);
-        p.kotak(bx, by, lebar_batang, bh, warna_ke(i));
-        if nilai_rupiah {
-            p.teks_tengah(
-                bx + lebar_batang / 2.0,
-                by - 3.0,
-                6.5,
-                true,
-                "#0f172a",
-                &format_rupiah_short(*v),
-            );
-        }
-        // Label di bawah, dibungkus dua baris bila perlu.
-        let singkat = Page::potong(label, lebar_batang + 14.0, 6.5, false);
-        let belah = belah_dua(&singkat, 12);
-        for (k, baris) in belah.iter().enumerate() {
-            p.teks_tengah(
-                bx + lebar_batang / 2.0,
-                y + pad_atas + ph + 9.0 + k as f64 * 8.0,
-                6.5,
-                false,
-                "#8b93a7",
-                baris,
-            );
+        .map(|r| r.1)
+        .chain(ramal.iter().map(|r| r.atas))
+        .fold(0.0_f64, f64::max);
+    let puncak = batas_bulat(maks);
+    let pw = w - kiri - 8.0;
+    let ph = h - atas - bawah;
+    let x0 = x + kiri;
+    let y0 = y + atas;
+    let px = |t: f64| x0 + (t - x_min) / (x_maks - x_min).max(1.0) * pw;
+    let py = |v: f64| y0 + ph - (v / puncak).clamp(0.0, 1.0) * ph;
+    for i in 0..=4 {
+        let v = puncak * i as f64 / 4.0;
+        p.garis(x0, py(v), x0 + pw, py(v), GARIS, 0.5);
+        p.teks_kanan(x0 - 5.0, py(v) + 2.5, 6.5, false, REDUP, &fmt(v));
+    }
+    let rentang = (x_maks - x_min).max(1.0);
+    let langkah = [1.0, 2.0, 5.0, 10.0]
+        .into_iter()
+        .find(|l| rentang / l <= 10.0)
+        .unwrap_or(20.0);
+    let mut t = (x_min / langkah).ceil() * langkah;
+    while t <= x_maks + 1e-9 {
+        p.teks_tengah(px(t), y + h - 3.0, 6.5, false, REDUP, &format!("{t:.0}"));
+        t += langkah;
+    }
+    let akhir = riwayat[riwayat.len() - 1];
+    if !ramal.is_empty() {
+        let mut pita: Vec<(f64, f64)> = vec![(px(akhir.0 as f64), py(akhir.1))];
+        pita.extend(ramal.iter().map(|r| (px(r.tahun as f64), py(r.atas))));
+        pita.extend(ramal.iter().rev().map(|r| (px(r.tahun as f64), py(r.bawah))));
+        p.poligon(&pita, "#e3e9fd");
+    }
+    let nyata: Vec<(f64, f64)> = riwayat.iter().map(|r| (px(r.0 as f64), py(r.1))).collect();
+    p.garis_poli(&nyata, UTAMA, 1.6);
+    for (cx, cy) in &nyata {
+        p.kotak(cx - 1.6, cy - 1.6, 3.2, 3.2, UTAMA);
+    }
+    if !ramal.is_empty() {
+        let mut depan: Vec<(f64, f64)> = vec![(px(akhir.0 as f64), py(akhir.1))];
+        depan.extend(ramal.iter().map(|r| (px(r.tahun as f64), py(r.nilai))));
+        p.putus(true);
+        p.garis_poli(&depan, UTAMA, 1.6);
+        p.putus(false);
+        for (cx, cy) in depan.iter().skip(1) {
+            p.kotak(cx - 1.6, cy - 1.6, 3.2, 3.2, "#ffffff");
+            p.kotak_tepi(cx - 1.6, cy - 1.6, 3.2, 3.2, UTAMA, 0.9);
         }
     }
 }
 
-fn belah_dua(s: &str, maks: usize) -> Vec<String> {
-    if s.chars().count() <= maks {
-        return vec![s.to_string()];
-    }
-    let mut a = String::new();
-    let mut b = String::new();
-    for (i, c) in s.chars().enumerate() {
-        if i < maks {
-            a.push(c);
-        } else if b.chars().count() < maks {
-            b.push(c);
+/// Batang 100% sebaran kondisi.
+#[allow(clippy::too_many_arguments)]
+pub fn bilah_kondisi(p: &mut Page, x: f64, y: f64, w: f64, h: f64, baik: i64, rr: i64, rb: i64, tak: i64) {
+    let total = (baik + rr + rb + tak).max(1) as f64;
+    p.kotak(x, y, w, h, TRACK);
+    let mut cx = x;
+    for (v, warna) in [(baik, C_BAIK), (rr, C_RR), (rb, C_RB), (tak, C_TAK)] {
+        let lw = w * v as f64 / total;
+        if lw > 0.0 {
+            p.kotak(cx, y, lw, h, warna);
+            cx += lw;
         }
     }
-    if b.chars().count() > maks {
-        b = format!("{}…", &b[..maks.saturating_sub(1)]);
-    }
-    vec![a, b]
+}
+
+/// Batang nilai mendatar (0–100%) untuk komponen skor.
+pub fn bilah_nilai(p: &mut Page, x: f64, y: f64, w: f64, h: f64, persen: f64, warna: &str) {
+    p.kotak(x, y, w, h, TRACK);
+    p.kotak(x, y, w * (persen / 100.0).clamp(0.0, 1.0), h, warna);
 }
 
 #[cfg(test)]
@@ -343,63 +267,37 @@ mod tests {
     fn grafik_menggambar_tanpa_panik() {
         let mut d = Dokumen::new("Uji Grafik");
         let mut p = Page::new(A4_W, A4_H);
-        judul_bagian(&mut p, 40.0, 40.0, 515.0, "Komposisi", Some("uji"));
-        kartu_kpi(
-            &mut p, 40.0, 70.0, 120.0, 56.0, "Total", "1.234", "unit", "blue",
-        );
-        donut(
-            &mut p,
-            120.0,
-            260.0,
-            54.0,
-            16.0,
-            &[("Tanah".into(), 60.0), ("Gedung".into(), 40.0)],
-            "Total",
-            "Rp 1 M",
-        );
-        area(
+        kartu_kpi(&mut p, 40.0, 70.0, 120.0, 52.0, "Total", "1.234", "unit", "blue");
+        let label: Vec<String> = (2026..2032).map(|y| y.to_string()).collect();
+        kolom(
             &mut p,
             40.0,
-            380.0,
-            515.0,
             140.0,
+            500.0,
+            150.0,
+            &label,
             &[
-                crate::model::TrendPoint {
-                    year: 2019,
-                    jumlah: 10,
-                    nilai: 5.0,
-                },
-                crate::model::TrendPoint {
-                    year: 2020,
-                    jumlah: 30,
-                    nilai: 9.0,
-                },
-                crate::model::TrendPoint {
-                    year: 2021,
-                    jumlah: 20,
-                    nilai: 7.0,
-                },
+                SeriPdf { nama: "A", warna: C_BAIK, nilai: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0] },
+                SeriPdf { nama: "B", warna: C_RB, nilai: vec![1.0; 6] },
             ],
-            false,
+            &|v| format!("{v:.0}"),
+            Some((4.0, "acuan")),
         );
-        bar_list(
+        // Deret kosong, satu titik, dan nilai nol tidak boleh panik.
+        kolom(&mut p, 40.0, 300.0, 500.0, 100.0, &[], &[], &|v| format!("{v:.0}"), None);
+        garis_ramal(&mut p, 40.0, 420.0, 500.0, 120.0, &[(2020, 1.0)], &[], &|v| format!("{v:.0}"));
+        garis_ramal(
             &mut p,
             40.0,
             560.0,
-            515.0,
-            &[("A".into(), 10, 1.0), ("B".into(), 5, 2.0)],
-            false,
-            10,
-        );
-        bar_vertikal(
-            &mut p,
-            40.0,
-            650.0,
-            515.0,
+            500.0,
             120.0,
-            &[("Kelompok A".into(), 10.0), ("Kelompok B".into(), 20.0)],
-            false,
+            &[(2020, 0.0), (2021, 0.0), (2022, 0.0)],
+            &[RamalTitik { tahun: 2023, nilai: 0.0, bawah: 0.0, atas: 0.0 }],
+            &|v| format!("{v:.0}"),
         );
+        bilah_kondisi(&mut p, 40.0, 700.0, 300.0, 8.0, 0, 0, 0, 0);
+        bilah_nilai(&mut p, 40.0, 720.0, 300.0, 6.0, 150.0, C_BAIK);
         d.tambah(p);
         let b = d.bangun("D:20260101120000Z");
         assert!(String::from_utf8_lossy(&b).starts_with("%PDF-1.4"));

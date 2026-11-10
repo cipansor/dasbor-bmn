@@ -21,14 +21,16 @@ fn baris_tahun(nama: String, kini: i64, th: &[f64; NH]) -> Vec<Sel> {
 }
 
 fn isi(a: Analisis) -> AnyView {
-    let r: Ringkas = a.nasional.clone();
+    let r: Ringkas = a.nasional;
     let m = a.meta.clone();
     let akhir = m.tahun_akhir();
     let label_th: Vec<String> = (0..NH).map(|k| m.label_tahun(k)).collect();
     let mut kep: Vec<String> = vec!["Kategori".into(), ">Sudah".into()];
     kep.extend(label_th.iter().map(|l| format!(">{l}")));
     kep.push(format!(">Tambahan s.d. {akhir}"));
-    let kep_ref: Vec<&str> = kep.iter().map(|s| s.as_str()).collect();
+    let kep_habis = kepala(&kep.iter().map(|s| s.as_str()).collect::<Vec<_>>());
+    let kep_rb = kep_habis.clone();
+    let label_rb = label_th.clone();
 
     let habis: Vec<Vec<Sel>> = a
         .kategori
@@ -99,22 +101,22 @@ fn isi(a: Analisis) -> AnyView {
 
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <SectionCard title="Habis Masa Manfaat per Tahun" subtitle="unit · * = sisa tahun berjalan">
-                <KolomTumpuk label=label_th.clone() seri=vec![Seri { nama: "Habis masa manfaat".into(), warna: W_UNGU, nilai: r.habis_th.to_vec() }] satuan="unit"/>
+                <KolomTumpuk label=label_th seri=vec![Seri { nama: "Habis masa manfaat".into(), warna: W_UNGU, nilai: r.habis_th.to_vec() }] satuan="unit"/>
             </SectionCard>
             <SectionCard title="Perkiraan Rusak Berat Baru per Tahun" subtitle="unit · ekspektasi">
-                <KolomTumpuk label=label_th seri=vec![Seri { nama: "Rusak berat baru".into(), warna: W_RB, nilai: r.rb_th.to_vec() }] satuan="unit"/>
+                <KolomTumpuk label=label_rb seri=vec![Seri { nama: "Rusak berat baru".into(), warna: W_RB, nilai: r.rb_th.to_vec() }] satuan="unit"/>
             </SectionCard>
         </div>
 
         <div class="mt-4">
             <SectionCard title="Jadwal Habis Masa Manfaat per Kategori" subtitle="unit · pasti menurut sisa umur pada SIMAN">
-                <Tabel kepala=kepala(&kep_ref) baris=habis total=baris_tahun("Seluruh kategori".into(), r.habis, &r.habis_th)/>
+                <Tabel kepala=kep_habis baris=habis total=baris_tahun("Seluruh kategori".into(), r.habis, &r.habis_th)/>
             </SectionCard>
         </div>
 
         <div class="mt-4">
             <SectionCard title="Perkiraan Rusak Berat Baru per Kategori" subtitle="unit · ekspektasi model, kolom Sudah = rusak berat saat ini">
-                <Tabel kepala=kepala(&kep_ref) baris=rb total=baris_tahun("Seluruh kategori".into(), r.rb, &r.rb_th)/>
+                <Tabel kepala=kep_rb baris=rb total=baris_tahun("Seluruh kategori".into(), r.rb, &r.rb_th)/>
             </SectionCard>
         </div>
 

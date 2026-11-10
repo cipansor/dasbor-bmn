@@ -61,7 +61,7 @@ fn SettingsBody(
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <StatusItem
                         label="Endpoint Gateway"
-                        value=if info.base_url_set { "Terpasang".into() } else { "Default".into() }
+                        value={if info.base_url_set { "Terpasang".into() } else { "Default".into() }}
                         ok=info.base_url_set
                     />
                     <StatusItem
@@ -71,7 +71,7 @@ fn SettingsBody(
                     />
                     <StatusItem
                         label="Client Secret"
-                        value=if info.client_secret_set { "Tersimpan".into() } else { "Belum diisi".into() }
+                        value={if info.client_secret_set { "Tersimpan".into() } else { "Belum diisi".into() }}
                         ok=info.client_secret_set
                     />
                     <StatusItem

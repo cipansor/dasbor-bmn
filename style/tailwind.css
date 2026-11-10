@@ -2,6 +2,11 @@
 
 @source "../src";
 
+/* Mode gelap mengikuti kelas `.dark` pada <html> (tombol tema), bukan hanya
+   preferensi sistem. Tanpa ini utilitas `dark:` dan kelas `.dark .card`
+   mengikuti dua sumber berbeda dan tema tampil setengah gelap. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-bmn-50: #eef4ff;
   --color-bmn-100: #d9e6ff;
@@ -83,5 +88,18 @@
 @media print {
   .no-print {
     display: none !important;
+  }
+  /* Halaman dasbor dapat dicetak langsung: tanpa navigasi, lebar penuh,
+     dan kartu tidak terbelah antarhalaman. */
+  body {
+    background: #fff !important;
+  }
+  .card {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .table-wrap {
+    overflow: visible !important;
+    max-height: none !important;
   }
 }

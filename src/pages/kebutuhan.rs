@@ -53,9 +53,11 @@ fn isi(a: Analisis) -> AnyView {
 
     let badan = move || {
         let sk = s.get();
-        a.with_value(|a| {
-            let r = &a.nasional;
-            let m = &a.meta;
+        {
+            let a = a.get_value();
+            let r = a.nasional;
+            let m = a.meta.clone();
+            let akhir = m.tahun_akhir();
             let label_th: Vec<String> = std::iter::once("Tunggakan".to_string())
                 .chain((0..NH).map(|k| m.label_tahun(k)))
                 .collect();
@@ -85,7 +87,9 @@ fn isi(a: Analisis) -> AnyView {
             kep.extend((0..NH).map(|k| format!(">{}", m.label_tahun(k))));
             kep.push(">Total unit".into());
             kep.push(">Perkiraan biaya".into());
-            let kep_ref: Vec<&str> = kep.iter().map(|x| x.as_str()).collect();
+            let kep = kepala(&kep.iter().map(|x| x.as_str()).collect::<Vec<_>>());
+            let label_biaya = label_th.clone();
+            let kapasitas = a.kapasitas.clone();
             let baris: Vec<Vec<Sel>> = a
                 .kategori
                 .iter()
@@ -150,6 +154,17 @@ fn isi(a: Analisis) -> AnyView {
                 })
                 .collect();
             let idle_baik: i64 = a.kelompok_butuh.iter().map(|k| k.idle_baik).sum();
+            let banding: Vec<Vec<Sel>> = (0..3)
+                .map(|i| {
+                    vec![
+                        Sel::Teks(SKENARIO[i].0.to_string()),
+                        Sel::unit_f(r.ganti_kini[i]),
+                        Sel::unit_f(r.ganti_total(i)),
+                        Sel::rupiah(r.biaya_total(i)),
+                        Sel::rupiah(r.biaya_total(i) / HORIZON as f64),
+                    ]
+                })
+                .collect();
 
             view! {
                 <p class="mt-2 text-sm text-ink-600 dark:text-ink-300">
@@ -159,32 +174,32 @@ fn isi(a: Analisis) -> AnyView {
 
                 <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
                     <Kpi label="Tunggakan Saat Ini" value=format!("{} unit", format_unit(r.ganti_kini[sk])) hint=format!("perkiraan {}", format_rupiah_short(r.biaya_kini[sk])) icon="📌" tone="rose"/>
-                    <Kpi label=format!("Kebutuhan s.d. {}", m.tahun_akhir()) value=format!("{} unit", format_unit(r.ganti_total(sk))) hint="termasuk tunggakan" icon="🧮"/>
+                    <Kpi label=format!("Kebutuhan s.d. {akhir}") value=format!("{} unit", format_unit(r.ganti_total(sk))) hint="termasuk tunggakan" icon="🧮"/>
                     <Kpi label="Perkiraan Biaya" value=format_rupiah_short(r.biaya_total(sk)) hint=format!("rata-rata {} per tahun", format_rupiah_short(per_tahun)) icon="💰" tone="emerald"/>
                     <Kpi
                         label="Dibanding Perolehan Historis"
-                        value=if rasio > 0.0 { format!("{}×", format_desimal(rasio, 1)) } else { "–".into() }
-                        hint=format!("rata-rata {}–{}: {}/tahun", a.kapasitas.tahun_awal, a.kapasitas.tahun_akhir, format_rupiah_short(a.kapasitas.nilai_per_tahun))
+                        value={if rasio > 0.0 { format!("{}×", format_desimal(rasio, 1)) } else { "–".into() }}
+                        hint=format!("rata-rata {}–{}: {}/tahun", kapasitas.tahun_awal, kapasitas.tahun_akhir, format_rupiah_short(kapasitas.nilai_per_tahun))
                         icon="⚖️"
-                        tone=if rasio > 1.5 { "rose" } else if rasio > 1.0 { "amber" } else { "emerald" }
+                        tone={if rasio > 1.5 { "rose" } else if rasio > 1.0 { "amber" } else { "emerald" }}
                     />
                 </div>
 
                 <div class="mt-4 grid gap-4 lg:grid-cols-2">
                     <SectionCard title="Kebutuhan Unit per Tahun" subtitle="penggantian + rehabilitasi">
-                        <KolomTumpuk label=label_th.clone() seri=vec![Seri { nama: "Unit".into(), warna: W_UTAMA, nilai: unit }] satuan="unit"/>
+                        <KolomTumpuk label=label_th seri=vec![Seri { nama: "Unit".into(), warna: W_UTAMA, nilai: unit }] satuan="unit"/>
                     </SectionCard>
                     <SectionCard title="Perkiraan Biaya per Tahun" subtitle="rupiah · harga dieskalasi per tahun">
                         {match acuan {
-                            Some(ac) => view! { <KolomTumpuk label=label_th seri=vec![Seri { nama: "Biaya".into(), warna: W_KEDUA, nilai: biaya }] satuan="rupiah" acuan=ac/> }.into_any(),
-                            None => view! { <KolomTumpuk label=label_th seri=vec![Seri { nama: "Biaya".into(), warna: W_KEDUA, nilai: biaya }] satuan="rupiah"/> }.into_any(),
+                            Some(ac) => view! { <KolomTumpuk label=label_biaya seri=vec![Seri { nama: "Biaya".into(), warna: W_KEDUA, nilai: biaya }] satuan="rupiah" acuan=ac/> }.into_any(),
+                            None => view! { <KolomTumpuk label=label_biaya seri=vec![Seri { nama: "Biaya".into(), warna: W_KEDUA, nilai: biaya }] satuan="rupiah"/> }.into_any(),
                         }}
                     </SectionCard>
                 </div>
 
                 <div class="mt-4">
                     <SectionCard title="Kebutuhan per Kategori" subtitle="unit per tahun anggaran">
-                        <Tabel kepala=kepala(&kep_ref) baris=baris total=total/>
+                        <Tabel kepala=kep baris=baris total=total/>
                     </SectionCard>
                 </div>
 
@@ -233,23 +248,15 @@ fn isi(a: Analisis) -> AnyView {
                             </div>
                         </dl>
                     </SectionCard>
-                    <SectionCard title="Ketiga Skenario Berdampingan" subtitle=format!("total s.d. {}", m.tahun_akhir())>
+                    <SectionCard title="Ketiga Skenario Berdampingan" subtitle=format!("total s.d. {akhir}")>
                         <Tabel
                             kepala=kepala(&["Skenario", ">Tunggakan (unit)", ">Total unit", ">Perkiraan biaya", ">Per tahun"])
-                            baris=(0..3)
-                                .map(|i| vec![
-                                    Sel::Teks(SKENARIO[i].0.to_string()),
-                                    Sel::unit_f(r.ganti_kini[i]),
-                                    Sel::unit_f(r.ganti_total(i)),
-                                    Sel::rupiah(r.biaya_total(i)),
-                                    Sel::rupiah(r.biaya_total(i) / HORIZON as f64),
-                                ])
-                                .collect::<Vec<_>>()
+                            baris=banding
                         />
                     </SectionCard>
                 </div>
             }
-        })
+        }
     };
 
     view! {

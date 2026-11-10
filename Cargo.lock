@@ -408,6 +408,7 @@ dependencies = [
  "axum",
  "chrono",
  "console_error_panic_hook",
+ "futures-core",
  "getrandom 0.4.3",
  "leptos",
  "leptos_axum",

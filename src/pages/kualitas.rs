@@ -14,8 +14,10 @@ pub fn KualitasPage() -> impl IntoView {
 }
 
 fn isi(a: Analisis) -> AnyView {
-    let r = &a.nasional;
-    let q = &a.kualitas;
+    let r = a.nasional;
+    let q = a.kualitas.clone();
+    let catatan_sisa = q.catatan_umur_sisa.clone();
+    let rasio_sisa = q.rasio_umur_sisa;
     let kolom: Vec<Vec<Sel>> = q
         .kolom
         .iter()
@@ -63,9 +65,9 @@ fn isi(a: Analisis) -> AnyView {
         <PitaData meta=a.meta.clone()/>
 
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Kpi label="Kelengkapan Data Kunci" value=format_persen(r.pct_lengkap()) hint="kondisi, tanggal perolehan, nilai" icon="🧪" tone=if r.pct_lengkap() >= 95.0 { "emerald" } else { "amber" }/>
-            <Kpi label="Cakupan PSP" value=format_persen(r.pct_psp()) hint=format!("{} dari {} unit", format_number(r.psp_ya), format_number(r.psp_n)) icon="📜" tone=if r.pct_psp() >= 90.0 { "emerald" } else { "amber" }/>
-            <Kpi label="Tanah Berbukti Kepemilikan" value=format_persen(r.pct_sertifikat()) hint=format!("{} dari {} bidang", format_number(r.sertif_ya), format_number(r.tanah_n)) icon="🗺️" tone=if r.pct_sertifikat() >= 90.0 { "emerald" } else { "amber" }/>
+            <Kpi label="Kelengkapan Data Kunci" value=format_persen(r.pct_lengkap()) hint="kondisi, tanggal perolehan, nilai" icon="🧪" tone={if r.pct_lengkap() >= 95.0 { "emerald" } else { "amber" }}/>
+            <Kpi label="Cakupan PSP" value=format_persen(r.pct_psp()) hint=format!("{} dari {} unit", format_number(r.psp_ya), format_number(r.psp_n)) icon="📜" tone={if r.pct_psp() >= 90.0 { "emerald" } else { "amber" }}/>
+            <Kpi label="Tanah Berbukti Kepemilikan" value=format_persen(r.pct_sertifikat()) hint=format!("{} dari {} bidang", format_number(r.sertif_ya), format_number(r.tanah_n)) icon="🗺️" tone={if r.pct_sertifikat() >= 90.0 { "emerald" } else { "amber" }}/>
             <Kpi label="Kondisi Tidak Diisi" value=format!("{} unit", format_number(r.tak)) hint="aset fisik tanpa uraian kondisi" icon="❔" tone="rose"/>
         </div>
 
@@ -90,8 +92,8 @@ fn isi(a: Analisis) -> AnyView {
             <Catatan>
                 <p>
                     <span class="font-semibold">"Uji satuan sisa umur. "</span>
-                    {q.catatan_umur_sisa.clone()}
-                    {(q.rasio_umur_sisa > 0.0).then(|| format!(" (rasio median {}; nilai sekitar 1 berarti selaras)", crate::model::format_desimal(q.rasio_umur_sisa, 2)))}
+                    {catatan_sisa}
+                    {(rasio_sisa > 0.0).then(|| format!(" (rasio median {}; nilai sekitar 1 berarti selaras)", crate::model::format_desimal(rasio_sisa, 2)))}
                 </p>
                 {(dikecualikan > 0)
                     .then(|| {

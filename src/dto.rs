@@ -27,7 +27,10 @@ pub const SKENARIO: [(&str, &str); 3] = [
 ];
 
 /// Ringkasan satu kelompok aset (nasional, kategori, provinsi, atau satuan kerja).
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+///
+/// Seluruh isinya angka sehingga `Copy`: tampilan dapat memakainya di banyak
+/// bagian tanpa menyalin secara eksplisit.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 pub struct Ringkas {
     /// Jumlah unit aset aktif.
     pub unit: i64,
@@ -224,7 +227,7 @@ impl Ringkas {
 }
 
 /// Skor kesehatan pengelolaan BMN (0–100) beserta komponennya.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 pub struct Skor {
     pub total: f64,
     pub kondisi: f64,

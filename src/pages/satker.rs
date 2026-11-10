@@ -202,7 +202,7 @@ pub fn SatkerRinciPage() -> impl IntoView {
 
 #[component]
 fn Rinci(s: SatkerRinci) -> impl IntoView {
-    let r = s.r.clone();
+    let r = s.r;
     let m = s.meta.clone();
     let akhir = m.tahun_akhir();
     let label_th: Vec<String> = (0..NH).map(|k| m.label_tahun(k)).collect();
@@ -247,7 +247,8 @@ fn Rinci(s: SatkerRinci) -> impl IntoView {
     kep_sk.extend(label_th.iter().map(|l| format!(">{l}")));
     kep_sk.push(">Total unit".into());
     kep_sk.push(">Perkiraan biaya".into());
-    let kep_sk_ref: Vec<&str> = kep_sk.iter().map(|x| x.as_str()).collect();
+    let kep_sk = kepala(&kep_sk.iter().map(|x| x.as_str()).collect::<Vec<_>>());
+    let label_rb = label_th.clone();
     let skenario: Vec<Vec<Sel>> = (0..3)
         .map(|i| {
             let mut sel = vec![Sel::Teks(SKENARIO[i].0.to_string()), Sel::unit_f(r.ganti_kini[i])];
@@ -272,7 +273,7 @@ fn Rinci(s: SatkerRinci) -> impl IntoView {
 
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Kpi label="Total BMN" value=format!("{} unit", format_number(r.unit)) hint=format!("nilai {} · buku {}", format_rupiah_short(r.nilai), format_rupiah_short(r.buku)) icon="📦"/>
-            <Kpi label="Kondisi Baik" value=format_persen(r.pct_baik()) hint=banding(r.pct_baik(), s.nasional_pct_baik, true) icon="🩺" tone=if r.pct_baik() >= s.nasional_pct_baik { "emerald" } else { "amber" }/>
+            <Kpi label="Kondisi Baik" value=format_persen(r.pct_baik()) hint=banding(r.pct_baik(), s.nasional_pct_baik, true) icon="🩺" tone={if r.pct_baik() >= s.nasional_pct_baik { "emerald" } else { "amber" }}/>
             <Kpi label="Rusak Berat" value=format!("{} unit", format_number(r.rb)) hint=format!("senilai {} · rusak ringan {}", format_rupiah_short(r.nilai_rb), format_number(r.rr)) icon="🛠️" tone="rose"/>
             <Kpi label="Habis Masa Manfaat" value=format!("{} unit", format_number(r.habis)) hint=banding(r.pct_habis(), s.nasional_pct_habis, false) icon="⏳" tone="violet"/>
         </div>
@@ -328,16 +329,16 @@ fn Rinci(s: SatkerRinci) -> impl IntoView {
 
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <SectionCard title="Habis Masa Manfaat per Tahun" subtitle="unit">
-                <KolomTumpuk label=label_th.clone() seri=vec![Seri { nama: "Habis masa manfaat".into(), warna: W_UNGU, nilai: r.habis_th.to_vec() }] satuan="unit"/>
+                <KolomTumpuk label=label_th seri=vec![Seri { nama: "Habis masa manfaat".into(), warna: W_UNGU, nilai: r.habis_th.to_vec() }] satuan="unit"/>
             </SectionCard>
             <SectionCard title="Perkiraan Rusak Berat Baru per Tahun" subtitle="unit · ekspektasi">
-                <KolomTumpuk label=label_th seri=vec![Seri { nama: "Rusak berat baru".into(), warna: W_RB, nilai: r.rb_th.to_vec() }] satuan="unit"/>
+                <KolomTumpuk label=label_rb seri=vec![Seri { nama: "Rusak berat baru".into(), warna: W_RB, nilai: r.rb_th.to_vec() }] satuan="unit"/>
             </SectionCard>
         </div>
 
         <div class="mt-4">
             <SectionCard title="Kebutuhan Lima Tahun per Skenario" subtitle="unit per tahun anggaran">
-                <Tabel kepala=kepala(&kep_sk_ref) baris=skenario/>
+                <Tabel kepala=kep_sk baris=skenario/>
             </SectionCard>
         </div>
 

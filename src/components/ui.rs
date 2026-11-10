@@ -230,9 +230,6 @@ impl Sel {
         let (p, nada) = crate::dto::Skor::predikat(v);
         Sel::Lencana(format!("{} · {p}", format_desimal(v, 1)), nada)
     }
-    fn kanan(&self) -> bool {
-        matches!(self, Sel::Angka(_))
-    }
 }
 
 fn lihat_sel(s: Sel, tebal: bool) -> AnyView {

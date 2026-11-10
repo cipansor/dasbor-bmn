@@ -110,7 +110,7 @@ pub fn svg_kolom(
             esc(&fmt(v))
         ));
     }
-    for i in 0..n {
+    for i in 0..label.len() {
         let x = KIRI + lebar * i as f64 + (lebar - batang) / 2.0;
         let mut dasar = 0.0;
         for sr in seri {
@@ -637,6 +637,13 @@ mod tests {
             .collect();
         assert_eq!(tinggi.len(), 2);
         assert!((tinggi[0] - 2.0 * tinggi[1]).abs() < 0.2, "{tinggi:?}");
+    }
+
+    #[test]
+    fn kolom_tanpa_label_tidak_panik() {
+        let svg = svg_kolom(&[], &[], &|v| format!("{v:.0}"), None);
+        assert!(svg.starts_with("<svg") && svg.ends_with("</svg>"));
+        assert!(!svg.contains("<rect"));
     }
 
     #[test]

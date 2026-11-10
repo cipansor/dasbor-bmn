@@ -9,8 +9,10 @@
 # `wasm-bindgen` agar glue JS merujuk berkas `*_bg.wasm` yang benar.
 #
 # Perkakas: cargo, wasm-bindgen, dan Tailwind CSS v4 (standalone CLI `tailwindcss`,
-# atau `npx` sebagai cadangan). Skrip berhenti dengan galat bila salah satu
-# langkah gagal, termasuk pembuatan CSS.
+# atau paket npm yang dikunci di package.json). Skrip berhenti dengan galat bila
+# salah satu langkah gagal, termasuk pembuatan CSS.
+#
+# Pemakaian: scripts/build.sh [debug|release]
 
 set -eu
 
@@ -22,9 +24,21 @@ SITE_ROOT="${LEPTOS_SITE_ROOT:-target/site}"
 PKG_DIR="${LEPTOS_SITE_PKG_DIR:-pkg}"
 PKG="$SITE_ROOT/$PKG_DIR"
 
+# Profil build: `debug` (bawaan, cepat untuk pengembangan) atau `release`
+# (`scripts/build.sh release`) untuk penempatan. Build debug menghasilkan WASM
+# puluhan megabita; jangan dipakai untuk produksi.
+PROFIL="${1:-${DASBOR_PROFIL:-debug}}"
+case "$PROFIL" in
+  debug) CARGO_FLAG=""; WASM_FLAG="" ;;
+  release) CARGO_FLAG="--release"; WASM_FLAG="--profile wasm-release" ;;
+  *) echo "Profil tidak dikenal: $PROFIL (pakai debug atau release)" >&2; exit 1 ;;
+esac
+WASM_PROFIL_DIR="$PROFIL"
+[ "$PROFIL" = "release" ] && WASM_PROFIL_DIR="wasm-release"
+
 # Target WASM terpisah dari target host agar cache tidak saling mengganggu.
 WASM_TARGET_DIR="target/front"
-WASM_ARTIFACT="$WASM_TARGET_DIR/wasm32-unknown-unknown/debug/dasbor_bmn.wasm"
+WASM_ARTIFACT="$WASM_TARGET_DIR/wasm32-unknown-unknown/$WASM_PROFIL_DIR/dasbor_bmn.wasm"
 
 # Biner SSR wajib mendarat di target/debug karena dari situlah scripts/serve.sh
 # menjalankannya. Nilai ini dipaksa, bukan diwarisi: bila CARGO_TARGET_DIR di
@@ -43,16 +57,21 @@ need cargo
 need wasm-bindgen
 need rustup
 
-# Tailwind CSS v4: pakai CLI standalone bila ada, jika tidak jatuh ke npx.
+# Tailwind CSS v4: pakai CLI standalone bila ada; jika tidak, pakai paket npm
+# yang versinya dikunci di package.json. `npx @tailwindcss/cli` tanpa paket
+# `tailwindcss` terpasang gagal me-resolve `@import "tailwindcss"`, jadi
+# dependensi dipasang lebih dulu.
 TAILWIND=""
 if command -v tailwindcss >/dev/null 2>&1; then
   TAILWIND="tailwindcss"
-elif command -v npx >/dev/null 2>&1; then
-  TAILWIND="npx --yes @tailwindcss/cli"
+elif command -v npm >/dev/null 2>&1; then
+  if [ ! -x node_modules/.bin/tailwindcss ]; then
+    echo "==> Memasang Tailwind CSS (npm ci)"
+    npm ci --no-audit --no-fund
+  fi
+  TAILWIND="node_modules/.bin/tailwindcss"
 else
-  echo "Alat Tailwind CSS tidak ditemukan (butuh 'tailwindcss' atau 'npx')." >&2
-  echo "Pasang CLI standalone:" >&2
-  echo "  curl -sL https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 -o ~/.local/bin/tailwindcss && chmod +x ~/.local/bin/tailwindcss" >&2
+  echo "Alat Tailwind CSS tidak ditemukan (butuh 'tailwindcss' atau 'npm')." >&2
   exit 1
 fi
 
@@ -69,7 +88,8 @@ fi
 
 echo "==> 2/4 Bangun WASM hidrasi"
 rustup target add wasm32-unknown-unknown >/dev/null 2>&1 || true
-CARGO_TARGET_DIR="$WASM_TARGET_DIR" cargo build \
+# shellcheck disable=SC2086
+CARGO_TARGET_DIR="$WASM_TARGET_DIR" cargo build $WASM_FLAG \
   --lib --target wasm32-unknown-unknown \
   --no-default-features --features hydrate
 
@@ -93,12 +113,15 @@ if ! cmp -s "$WASM_BG" "$WASM_HTML"; then
   exit 1
 fi
 
-echo "==> 4/4 Bangun biner SSR -> $HOST_TARGET_DIR/debug/dasbor-bmn"
-CARGO_TARGET_DIR="$HOST_TARGET_DIR" cargo build --no-default-features --features ssr
+echo "==> 4/4 Bangun biner SSR -> $HOST_TARGET_DIR/$PROFIL/dasbor-bmn"
+# shellcheck disable=SC2086
+CARGO_TARGET_DIR="$HOST_TARGET_DIR" cargo build $CARGO_FLAG --no-default-features --features ssr
 
-if [ ! -x "$HOST_TARGET_DIR/debug/dasbor-bmn" ]; then
-  echo "GAGAL: biner SSR tidak ada di $HOST_TARGET_DIR/debug/dasbor-bmn" >&2
+if [ ! -x "$HOST_TARGET_DIR/$PROFIL/dasbor-bmn" ]; then
+  echo "GAGAL: biner SSR tidak ada di $HOST_TARGET_DIR/$PROFIL/dasbor-bmn" >&2
   exit 1
 fi
 
-echo "Selesai. Aset di $PKG, biner di $HOST_TARGET_DIR/debug/dasbor-bmn."
+echo "Selesai ($PROFIL). Aset di $PKG, biner di $HOST_TARGET_DIR/$PROFIL/dasbor-bmn."
+[ "$PROFIL" = "release" ] && echo "Jalankan: DASBOR_BIN=$HOST_TARGET_DIR/release/dasbor-bmn scripts/serve.sh"
+exit 0

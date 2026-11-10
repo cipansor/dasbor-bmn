@@ -1,7 +1,16 @@
 pub mod category;
 pub mod data;
+pub mod kebutuhan;
+pub mod kondisi;
+pub mod kualitas;
+pub mod metodologi;
 pub mod not_found;
 pub mod overview;
+pub mod prakiraan;
+pub mod prediksi;
+pub mod rekomendasi;
 pub mod report;
+pub mod satker;
 pub mod settings;
 pub mod sync;
+pub mod wilayah;

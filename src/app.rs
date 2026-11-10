@@ -6,11 +6,20 @@ use leptos_router::path;
 use crate::components::layout::{AppShell, ThemeInit};
 use crate::pages::category::CategoryPage;
 use crate::pages::data::DataPage;
+use crate::pages::kebutuhan::KebutuhanPage;
+use crate::pages::kondisi::KondisiPage;
+use crate::pages::kualitas::KualitasPage;
+use crate::pages::metodologi::MetodologiPage;
 use crate::pages::not_found::NotFound;
 use crate::pages::overview::OverviewPage;
+use crate::pages::prakiraan::PrakiraanPage;
+use crate::pages::prediksi::PrediksiPage;
+use crate::pages::rekomendasi::RekomendasiPage;
 use crate::pages::report::ReportPage;
+use crate::pages::satker::{SatkerPage, SatkerRinciPage};
 use crate::pages::settings::SettingsPage;
 use crate::pages::sync::SyncPage;
+use crate::pages::wilayah::WilayahPage;
 
 /// Kerangka HTML yang dikirim server (SSR) dan dihidrasi di peramban.
 pub fn shell(options: LeptosOptions) -> impl IntoView {
@@ -49,9 +58,19 @@ pub fn App() -> impl IntoView {
             <AppShell>
                 <Routes fallback=|| view! { <NotFound/> }>
                     <Route path=path!("/") view=OverviewPage/>
-                    <Route path=path!("/laporan") view=ReportPage/>
+                    <Route path=path!("/kondisi") view=KondisiPage/>
+                    <Route path=path!("/prediksi") view=PrediksiPage/>
+                    <Route path=path!("/kebutuhan") view=KebutuhanPage/>
+                    <Route path=path!("/prakiraan") view=PrakiraanPage/>
+                    <Route path=path!("/rekomendasi") view=RekomendasiPage/>
+                    <Route path=path!("/satker") view=SatkerPage/>
+                    <Route path=path!("/satker/:kode") view=SatkerRinciPage/>
+                    <Route path=path!("/wilayah") view=WilayahPage/>
                     <Route path=path!("/kategori") view=CategoryPage/>
                     <Route path=path!("/data") view=DataPage/>
+                    <Route path=path!("/kualitas") view=KualitasPage/>
+                    <Route path=path!("/laporan") view=ReportPage/>
+                    <Route path=path!("/metodologi") view=MetodologiPage/>
                     <Route path=path!("/sinkronisasi") view=SyncPage/>
                     <Route path=path!("/pengaturan") view=SettingsPage/>
                 </Routes>

@@ -27,11 +27,12 @@ fn tanda(v: i64) -> String {
 }
 
 fn isi(a: Analisis) -> AnyView {
-    let r = a.nasional.clone();
+    let r = a.nasional;
     let m = a.meta.clone();
     let akhir = m.tahun_akhir();
     let (predikat, nada_skor) = Skor::predikat(a.skor.total);
     let label_th: Vec<String> = (0..NH).map(|k| m.label_tahun(k)).collect();
+    let label_rb = label_th.clone();
 
     let donut: Vec<(String, f64)> = a
         .kategori
@@ -129,7 +130,7 @@ fn isi(a: Analisis) -> AnyView {
                 value=format_persen(r.pct_baik())
                 hint=format!("rusak ringan {} · rusak berat {}", format_number(r.rr), format_number(r.rb))
                 icon="🩺"
-                tone=if r.pct_baik() >= 85.0 { "emerald" } else if r.pct_baik() >= 70.0 { "amber" } else { "rose" }
+                tone={if r.pct_baik() >= 85.0 { "emerald" } else if r.pct_baik() >= 70.0 { "amber" } else { "rose" }}
             />
             <Kpi
                 label="Skor Kesehatan BMN"
@@ -225,14 +226,14 @@ fn isi(a: Analisis) -> AnyView {
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <SectionCard title="Habis Masa Manfaat per Tahun" subtitle="unit · * = sisa tahun berjalan">
                 <KolomTumpuk
-                    label=label_th.clone()
+                    label=label_th
                     seri=vec![Seri { nama: "Habis masa manfaat".into(), warna: W_UNGU, nilai: r.habis_th.to_vec() }]
                     satuan="unit"
                 />
             </SectionCard>
             <SectionCard title="Perkiraan Rusak Berat Baru per Tahun" subtitle="unit · ekspektasi model kerusakan">
                 <KolomTumpuk
-                    label=label_th
+                    label=label_rb
                     seri=vec![Seri { nama: "Rusak berat baru".into(), warna: W_RB, nilai: r.rb_th.to_vec() }]
                     satuan="unit"
                 />

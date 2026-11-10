@@ -223,6 +223,11 @@ impl Page {
         }
     }
 
+    /// Atur pola garis putus-putus (`false` mengembalikan garis utuh).
+    pub fn putus(&mut self, aktif: bool) {
+        self.op(if aktif { "[4 3] 0 d\n" } else { "[] 0 d\n" });
+    }
+
     /// Tutup jalur.
     pub fn jalur_tutup(&mut self) {
         self.op("h\n");
@@ -308,6 +313,29 @@ impl Page {
         }
         format!("{s}…")
     }
+}
+
+/// Pecah teks menjadi baris-baris yang muat dalam `lebar`.
+pub fn bungkus(isi: &str, lebar: f64, ukuran: f64, tebal: bool) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut baris = String::new();
+    for kata in isi.split_whitespace() {
+        let coba = if baris.is_empty() {
+            kata.to_string()
+        } else {
+            format!("{baris} {kata}")
+        };
+        if lebar_teks(&coba, ukuran, tebal) > lebar && !baris.is_empty() {
+            out.push(std::mem::take(&mut baris));
+            baris = kata.to_string();
+        } else {
+            baris = coba;
+        }
+    }
+    if !baris.is_empty() {
+        out.push(baris);
+    }
+    out
 }
 
 /// Dokumen PDF berisi kumpulan halaman.
@@ -457,6 +485,17 @@ mod tests {
         let b = lebar_teks("iiii", 10.0, false);
         assert!(a > b, "huruf lebar harus lebih lebar dari huruf sempit");
         assert!((lebar_teks("W", 10.0, false) - 9.44).abs() < 0.01);
+    }
+
+    #[test]
+    fn bungkus_memecah_sesuai_lebar() {
+        let baris = bungkus("satu dua tiga empat lima enam tujuh delapan", 60.0, 10.0, false);
+        assert!(baris.len() >= 3);
+        assert!(baris.iter().all(|b| lebar_teks(b, 10.0, false) <= 60.0));
+        assert_eq!(baris.join(" "), "satu dua tiga empat lima enam tujuh delapan");
+        // Kata yang lebih lebar dari kolom tetap dicetak utuh pada barisnya sendiri.
+        assert_eq!(bungkus("kata-sangat-panjang-sekali x", 20.0, 10.0, false).len(), 2);
+        assert!(bungkus("   ", 50.0, 10.0, false).is_empty());
     }
 
     #[test]

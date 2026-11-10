@@ -53,7 +53,8 @@ fn isi(a: Analisis) -> AnyView {
     }));
     kep.push(">Galat uji balik".into());
     kep.push("Metode".into());
-    let kep_ref: Vec<&str> = kep.iter().map(|x| x.as_str()).collect();
+    let kep_unit = kepala(&kep.iter().map(|x| x.as_str()).collect::<Vec<_>>());
+    let kep_nilai = kep_unit.clone();
     let tabel = |ambil: fn(&crate::dto::Prakiraan) -> (&Deret, f64), rupiah: bool| -> Vec<Vec<Sel>> {
         a.prakiraan
             .iter()
@@ -105,10 +106,10 @@ fn isi(a: Analisis) -> AnyView {
             <Kpi label="Prakiraan Nilai Perolehan" value=format_rupiah_short(ramal_nilai) hint=format!("galat uji balik {}", galat(&total.nilai)) icon="💰" tone="emerald"/>
             <Kpi
                 label="Kebutuhan Moderat vs Tren"
-                value=if ramal_nilai > 0.0 { format!("{}×", format_desimal(butuh / ramal_nilai, 1)) } else { "–".into() }
+                value={if ramal_nilai > 0.0 { format!("{}×", format_desimal(butuh / ramal_nilai, 1)) } else { "–".into() }}
                 hint=format!("kebutuhan {} : tren perolehan", format_rupiah_short(butuh))
                 icon="⚖️"
-                tone=if butuh > ramal_nilai { "amber" } else { "emerald" }
+                tone={if butuh > ramal_nilai { "amber" } else { "emerald" }}
             />
         </div>
 
@@ -138,7 +139,7 @@ fn isi(a: Analisis) -> AnyView {
                             let metode = d.metode.clone();
                             let g = galat(&d);
                             view! {
-                                <GrafikRamal riwayat=d.riwayat ramal=d.ramal satuan=if pakai_rupiah { "rupiah" } else { "unit" }/>
+                                <GrafikRamal riwayat=d.riwayat ramal=d.ramal satuan={if pakai_rupiah { "rupiah" } else { "unit" }}/>
                                 <p class="mt-2 text-xs text-ink-600 dark:text-ink-300">
                                     {format!("{} — metode terpilih: {metode}; galat uji balik (sMAPE) {g}.", p.label)}
                                 </p>
@@ -150,12 +151,12 @@ fn isi(a: Analisis) -> AnyView {
 
         <div class="mt-4">
             <SectionCard title="Prakiraan Jumlah Unit per Kategori" subtitle="* = taksiran setahun penuh tahun berjalan">
-                <Tabel kepala=kepala(&kep_ref) baris=baris_unit/>
+                <Tabel kepala=kep_unit baris=baris_unit/>
             </SectionCard>
         </div>
         <div class="mt-4">
             <SectionCard title="Prakiraan Nilai Perolehan per Kategori" subtitle="rupiah">
-                <Tabel kepala=kepala(&kep_ref) baris=baris_nilai/>
+                <Tabel kepala=kep_nilai baris=baris_nilai/>
             </SectionCard>
         </div>
 

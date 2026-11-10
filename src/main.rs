@@ -1,7 +1,7 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use axum::routing::post;
+    use axum::routing::{get, post};
     use axum::Router;
     use dasbor_bmn::app::{shell, App};
     use dasbor_bmn::auth;
@@ -20,10 +20,10 @@ async fn main() {
     let app = Router::new()
         .route("/api/login", post(auth::login))
         .route("/api/logout", post(auth::logout))
-        .route(
-            "/api/laporan.pdf",
-            axum::routing::get(report::http::laporan_pdf),
-        )
+        .route("/api/laporan.pdf", get(report::http::laporan_pdf))
+        .route("/api/ekspor.csv", get(report::http::ekspor_csv))
+        .route("/api/satker.csv", get(report::http::satker_csv))
+        .route("/api/kebutuhan.csv", get(report::http::kebutuhan_csv))
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
             move || shell(leptos_options.clone())
