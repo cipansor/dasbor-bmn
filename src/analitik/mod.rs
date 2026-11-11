@@ -214,7 +214,7 @@ pub fn rinci_satker(kode: &str) -> Option<SatkerRinci> {
                 disusutkan: def.disusutkan,
                 kebutuhan: def.kebutuhan.label().into(),
                 masa_manfaat: (h.model.masa[*t] * 10.0).round() / 10.0,
-                r: r.clone(),
+                r: *r,
             }
         })
         .collect();
@@ -228,9 +228,9 @@ pub fn rinci_satker(kode: &str) -> Option<SatkerRinci> {
         prov: s.prov.clone(),
         peringkat: s.peringkat,
         dari: h.simpan.len() as i64,
-        skor: s.skor.clone(),
+        skor: s.skor,
         skor_nasional: h.analisis.skor.total,
-        r: s.r.clone(),
+        r: s.r,
         nasional_pct_baik: h.analisis.nasional.pct_baik(),
         nasional_pct_habis: h.analisis.nasional.pct_habis(),
         kategori,

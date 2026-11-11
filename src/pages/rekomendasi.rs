@@ -15,7 +15,12 @@ fn isi(a: Analisis) -> AnyView {
     let hitung = |p: u8| a.rekomendasi.iter().filter(|r| r.prioritas == p).count();
     let (tinggi, sedang, rendah) = (hitung(1), hitung(2), hitung(3));
     let kelompok = |p: u8, judul: &'static str| {
-        let daftar: Vec<_> = a.rekomendasi.iter().filter(|r| r.prioritas == p).cloned().collect();
+        let daftar: Vec<_> = a
+            .rekomendasi
+            .iter()
+            .filter(|r| r.prioritas == p)
+            .cloned()
+            .collect();
         (!daftar.is_empty()).then(|| {
             view! {
                 <h2 class="mb-2 mt-5 text-sm font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">{judul}</h2>

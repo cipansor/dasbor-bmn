@@ -73,7 +73,11 @@ fn isi(a: Analisis) -> AnyView {
                 Sel::Angka(format_desimal(x.lama_rr, 1)),
                 Sel::Angka(format_desimal(x.bentuk, 2)),
                 Sel::Angka(format_desimal(x.mae, 1)),
-                Sel::Teks(if x.gabungan { "kurva gabungan".into() } else { "data kategori".into() }),
+                Sel::Teks(if x.gabungan {
+                    "kurva gabungan".into()
+                } else {
+                    "data kategori".into()
+                }),
             ]
         })
         .collect();

@@ -55,27 +55,40 @@ fn isi(a: Analisis) -> AnyView {
     kep.push("Metode".into());
     let kep_unit = kepala(&kep.iter().map(|x| x.as_str()).collect::<Vec<_>>());
     let kep_nilai = kep_unit.clone();
-    let tabel = |ambil: fn(&crate::dto::Prakiraan) -> (&Deret, f64), rupiah: bool| -> Vec<Vec<Sel>> {
-        a.prakiraan
-            .iter()
-            .map(|p| {
-                let (d, berjalan) = ambil(p);
-                let f = |v: f64| if rupiah { Sel::rupiah(v) } else { Sel::unit_f(v) };
-                let mut sel = vec![Sel::Teks(p.label.clone()), f(berjalan)];
-                sel.extend(d.ramal.iter().map(|t| f(t.nilai)));
-                sel.push(Sel::Angka(galat(d)));
-                sel.push(Sel::Teks(d.metode.clone()));
-                sel
-            })
-            .collect()
-    };
+    let tabel =
+        |ambil: fn(&crate::dto::Prakiraan) -> (&Deret, f64), rupiah: bool| -> Vec<Vec<Sel>> {
+            a.prakiraan
+                .iter()
+                .map(|p| {
+                    let (d, berjalan) = ambil(p);
+                    let f = |v: f64| {
+                        if rupiah {
+                            Sel::rupiah(v)
+                        } else {
+                            Sel::unit_f(v)
+                        }
+                    };
+                    let mut sel = vec![Sel::Teks(p.label.clone()), f(berjalan)];
+                    sel.extend(d.ramal.iter().map(|t| f(t.nilai)));
+                    sel.push(Sel::Angka(galat(d)));
+                    sel.push(Sel::Teks(d.metode.clone()));
+                    sel
+                })
+                .collect()
+        };
     let baris_unit = tabel(|p| (&p.unit, p.berjalan.0), false);
     let baris_nilai = tabel(|p| (&p.nilai, p.berjalan.1), true);
 
     let buku_label: Vec<String> = a
         .buku_th
         .iter()
-        .map(|b| if b.tahun == 0 { "Kini".to_string() } else { b.tahun.to_string() })
+        .map(|b| {
+            if b.tahun == 0 {
+                "Kini".to_string()
+            } else {
+                b.tahun.to_string()
+            }
+        })
         .collect();
     let buku_alat: Vec<f64> = a.buku_th.iter().map(|b| b.peralatan).collect();
     let turun = match (a.buku_th.first(), a.buku_th.last()) {

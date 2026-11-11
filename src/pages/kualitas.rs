@@ -30,8 +30,20 @@ fn isi(a: Analisis) -> AnyView {
                 Sel::unit(k.total),
                 Sel::unit(k.total - k.terisi),
                 Sel::Lencana(
-                    if k.total > 0 { format_persen(pct) } else { "–".into() },
-                    if k.total == 0 { "slate" } else if pct >= 95.0 { "green" } else if pct >= 80.0 { "amber" } else { "red" },
+                    if k.total > 0 {
+                        format_persen(pct)
+                    } else {
+                        "–".into()
+                    },
+                    if k.total == 0 {
+                        "slate"
+                    } else if pct >= 95.0 {
+                        "green"
+                    } else if pct >= 80.0 {
+                        "amber"
+                    } else {
+                        "red"
+                    },
                 ),
             ]
         })
@@ -44,7 +56,11 @@ fn isi(a: Analisis) -> AnyView {
             vec![
                 Sel::Ganda(x.judul.clone(), x.uraian.clone()),
                 Sel::unit(x.jumlah),
-                Sel::Angka(if x.nilai > 0.0 { crate::model::format_rupiah_short(x.nilai) } else { "–".into() }),
+                Sel::Angka(if x.nilai > 0.0 {
+                    crate::model::format_rupiah_short(x.nilai)
+                } else {
+                    "–".into()
+                }),
             ]
         })
         .collect();
@@ -52,7 +68,12 @@ fn isi(a: Analisis) -> AnyView {
         .per_kategori
         .iter()
         .map(|(nama, pct, unit)| {
-            (nama.clone(), *pct, format!("{} · {} unit", format_persen(*pct), format_number(*unit)), None)
+            (
+                nama.clone(),
+                *pct,
+                format!("{} · {} unit", format_persen(*pct), format_number(*unit)),
+                None,
+            )
         })
         .collect();
     let dikecualikan = a.meta.dikecualikan;

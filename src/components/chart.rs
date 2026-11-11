@@ -41,7 +41,7 @@ pub fn esc(s: &str) -> String {
 
 /// Batas atas sumbu yang "bulat" (1, 2, 2,5, 5 × 10ⁿ) di atas nilai terbesar.
 pub fn batas_bulat(maks: f64) -> f64 {
-    if !(maks > 0.0) {
+    if maks.is_nan() || maks <= 0.0 {
         return 1.0;
     }
     let pangkat = 10f64.powf(maks.log10().floor());
@@ -282,7 +282,11 @@ pub fn svg_garis(
 }
 
 /// Cincin komposisi; bagian di luar tujuh terbesar digabung menjadi "Lainnya".
-pub fn svg_donut(data: &[(String, f64)], label_pusat: &str, nilai_pusat: &str) -> (String, Vec<(String, f64, &'static str)>) {
+pub fn svg_donut(
+    data: &[(String, f64)],
+    label_pusat: &str,
+    nilai_pusat: &str,
+) -> (String, Vec<(String, f64, &'static str)>) {
     let mut urut: Vec<(String, f64)> = data.iter().filter(|d| d.1 > 0.0).cloned().collect();
     urut.sort_by(|a, b| b.1.total_cmp(&a.1));
     let total: f64 = urut.iter().map(|d| d.1).sum();
@@ -362,8 +366,14 @@ pub fn KolomTumpuk(
     } else {
         &fmt_unit
     };
-    let svg = svg_kolom(&label, &seri, fmt, acuan.as_ref().map(|a| (a.0, a.1.as_str())));
-    let butir: Vec<(String, &'static str)> = seri.iter().map(|s| (s.nama.clone(), s.warna)).collect();
+    let svg = svg_kolom(
+        &label,
+        &seri,
+        fmt,
+        acuan.as_ref().map(|a| (a.0, a.1.as_str())),
+    );
+    let butir: Vec<(String, &'static str)> =
+        seri.iter().map(|s| (s.nama.clone(), s.warna)).collect();
     let banyak = butir.len() > 1;
     view! {
         <div>
@@ -516,7 +526,8 @@ pub fn BarList(
     data: Vec<(String, f64, String, Option<String>)>,
     #[prop(default = W_UTAMA)] warna: &'static str,
     /// Nilai yang mengisi batang penuh; bawaan = nilai terbesar pada data.
-    #[prop(optional)] skala: Option<f64>,
+    #[prop(optional)]
+    skala: Option<f64>,
 ) -> impl IntoView {
     let maks = skala.unwrap_or_else(|| data.iter().map(|d| d.1).fold(0.0_f64, f64::max));
     view! {
@@ -595,7 +606,10 @@ mod tests {
 
     #[test]
     fn teks_data_diloloskan() {
-        assert_eq!(esc("<script>\"a\" & 'b'"), "&lt;script&gt;&quot;a&quot; &amp; &#39;b&#39;");
+        assert_eq!(
+            esc("<script>\"a\" & 'b'"),
+            "&lt;script&gt;&quot;a&quot; &amp; &#39;b&#39;"
+        );
         let svg = svg_kolom(
             &["<b>2027</b>".to_string()],
             &[Seri {
@@ -655,7 +669,9 @@ mod tests {
 
     #[test]
     fn donut_menggabungkan_sisa() {
-        let data: Vec<(String, f64)> = (0..12).map(|i| (format!("K{i}"), 12.0 - i as f64)).collect();
+        let data: Vec<(String, f64)> = (0..12)
+            .map(|i| (format!("K{i}"), 12.0 - i as f64))
+            .collect();
         let (svg, legenda) = svg_donut(&data, "Total", "Rp 1 T");
         assert_eq!(legenda.len(), 8, "tujuh terbesar + Lainnya");
         assert_eq!(legenda[7].0, "Lainnya");
@@ -681,6 +697,9 @@ mod tests {
             &|x| x.to_string(),
             None,
         );
-        assert!(satu.contains("belum cukup"), "satu titik belum membentuk garis");
+        assert!(
+            satu.contains("belum cukup"),
+            "satu titik belum membentuk garis"
+        );
     }
 }

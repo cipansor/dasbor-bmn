@@ -199,19 +199,29 @@ fn DataTable(
     saring: ReadSignal<Saringan>,
     set_saring: WriteSignal<Saringan>,
 ) -> impl IntoView {
-    let total_pages = ((data.total as f64) / (data.per_page as f64)).ceil().max(1.0) as i64;
+    let total_pages = ((data.total as f64) / (data.per_page as f64))
+        .ceil()
+        .max(1.0) as i64;
     let page = data.page;
     // Susun ulang kolom: yang paling sering dibaca di depan, sisanya mengikuti.
     let mut urutan: Vec<usize> = KOLOM_UTAMA
         .iter()
         .filter_map(|n| data.columns.iter().position(|c| c.name == *n))
         .collect();
-    urutan.extend((0..data.columns.len()).filter(|i| !KOLOM_UTAMA.contains(&data.columns[*i].name.as_str())));
+    urutan.extend(
+        (0..data.columns.len()).filter(|i| !KOLOM_UTAMA.contains(&data.columns[*i].name.as_str())),
+    );
     let rupiah = |name: &str| name.starts_with("rph_");
     let angka = |name: &str| rupiah(name) || matches!(name, "umur_sisa" | "luas" | "no_aset");
     let kolom: Vec<(usize, String, String)> = urutan
         .iter()
-        .map(|i| (*i, data.columns[*i].name.clone(), data.columns[*i].label.clone()))
+        .map(|i| {
+            (
+                *i,
+                data.columns[*i].name.clone(),
+                data.columns[*i].label.clone(),
+            )
+        })
         .collect();
     let n_kolom = kolom.len();
     let rows = data.rows.clone();

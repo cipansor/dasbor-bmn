@@ -27,7 +27,11 @@ fn isi(a: Analisis) -> AnyView {
                 Sel::rupiah(r.nilai),
                 Sel::persen_bila(r.pct_baik(), r.kondisi_diketahui() > 0),
                 Sel::unit(r.rb),
-                Sel::Angka(format!("{} ({})", format_number(r.habis), crate::model::format_persen(r.pct_habis()))),
+                Sel::Angka(format!(
+                    "{} ({})",
+                    format_number(r.habis),
+                    crate::model::format_persen(r.pct_habis())
+                )),
                 Sel::unit(r.idle),
                 Sel::unit(r.hilang),
                 Sel::unit_f(r.rb_5()),
@@ -45,7 +49,11 @@ fn isi(a: Analisis) -> AnyView {
         Sel::rupiah(n.nilai),
         Sel::persen(n.pct_baik()),
         Sel::unit(n.rb),
-        Sel::Angka(format!("{} ({})", format_number(n.habis), crate::model::format_persen(n.pct_habis()))),
+        Sel::Angka(format!(
+            "{} ({})",
+            format_number(n.habis),
+            crate::model::format_persen(n.pct_habis())
+        )),
         Sel::unit(n.idle),
         Sel::unit(n.hilang),
         Sel::unit_f(n.rb_5()),
@@ -62,12 +70,20 @@ fn isi(a: Analisis) -> AnyView {
             (
                 p.nama.clone(),
                 p.r.biaya_total(1),
-                format!("{} · {} unit", format_rupiah_short(p.r.biaya_total(1)), format_unit(p.r.ganti_total(1))),
+                format!(
+                    "{} · {} unit",
+                    format_rupiah_short(p.r.biaya_total(1)),
+                    format_unit(p.r.ganti_total(1))
+                ),
                 None,
             )
         })
         .collect();
-    let mut rusak: Vec<_> = a.provinsi.iter().filter(|p| p.r.kondisi_diketahui() >= 30).collect();
+    let mut rusak: Vec<_> = a
+        .provinsi
+        .iter()
+        .filter(|p| p.r.kondisi_diketahui() >= 30)
+        .collect();
     rusak.sort_by(|x, y| y.r.pct_rb().total_cmp(&x.r.pct_rb()));
     let rusak: Vec<(String, f64, String, Option<String>)> = rusak
         .iter()
@@ -76,7 +92,11 @@ fn isi(a: Analisis) -> AnyView {
             (
                 p.nama.clone(),
                 p.r.pct_rb(),
-                format!("{} · {} unit", crate::model::format_persen(p.r.pct_rb()), format_number(p.r.rb)),
+                format!(
+                    "{} · {} unit",
+                    crate::model::format_persen(p.r.pct_rb()),
+                    format_number(p.r.rb)
+                ),
                 None,
             )
         })

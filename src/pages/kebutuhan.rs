@@ -129,7 +129,11 @@ fn isi(a: Analisis) -> AnyView {
                         Sel::persen(100.0 * k.unit[sk] / k.unit_total.max(1) as f64),
                         Sel::Ganda(format_rupiah_short(k.harga), k.sumber_harga.clone()),
                         Sel::rupiah(k.biaya[sk]),
-                        Sel::Angka(if k.idle_baik > 0 { format_number(k.idle_baik) } else { "–".into() }),
+                        Sel::Angka(if k.idle_baik > 0 {
+                            format_number(k.idle_baik)
+                        } else {
+                            "–".into()
+                        }),
                     ]
                 })
                 .collect();

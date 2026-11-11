@@ -19,7 +19,13 @@ fn unduhan(isi: impl Into<Body>, jenis: &'static str, nama: &str) -> Response {
     // Nama berkas hanya memuat karakter aman agar tidak merusak kepala HTTP.
     let aman: String = nama
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.') { c } else { '-' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.') {
+                c
+            } else {
+                '-'
+            }
+        })
         .collect();
     let mut res = (StatusCode::OK, isi.into()).into_response();
     let h = res.headers_mut();
@@ -34,7 +40,10 @@ fn unduhan(isi: impl Into<Body>, jenis: &'static str, nama: &str) -> Response {
 fn galat(status: StatusCode, pesan: &str) -> Response {
     (
         status,
-        [(header::CONTENT_TYPE, HeaderValue::from_static("text/plain; charset=utf-8"))],
+        [(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("text/plain; charset=utf-8"),
+        )],
         pesan.to_string(),
     )
         .into_response()
@@ -148,7 +157,10 @@ pub async fn ekspor_csv(Query(params): Query<HashMap<String, String>>) -> Respon
         const POTONG: usize = 64 * 1024;
         let mut buf: Vec<u8> = Vec::with_capacity(POTONG + 4096);
         buf.extend_from_slice(BOM);
-        baris_csv(&mut buf, &kolom.iter().map(|c| sel(&c.label)).collect::<Vec<_>>());
+        baris_csv(
+            &mut buf,
+            &kolom.iter().map(|c| sel(&c.label)).collect::<Vec<_>>(),
+        );
         let mut putus = false;
         let hasil = store::alir_baris(&tabel, |v| {
             if putus {
@@ -181,7 +193,11 @@ pub async fn ekspor_csv(Query(params): Query<HashMap<String, String>>) -> Respon
             }
         }
     });
-    unduhan(Body::from_stream(Aliran(rx)), "text/csv; charset=utf-8", &nama)
+    unduhan(
+        Body::from_stream(Aliran(rx)),
+        "text/csv; charset=utf-8",
+        &nama,
+    )
 }
 
 /// `GET /api/satker.csv` — ringkasan seluruh satuan kerja.
@@ -351,7 +367,9 @@ mod tests {
         q.insert("tabel".to_string(), t.to_string());
         let res = ekspor_csv(Query(q)).await;
         assert_eq!(res.status(), StatusCode::OK);
-        let bytes = axum::body::to_bytes(res.into_body(), usize::MAX).await.unwrap();
+        let bytes = axum::body::to_bytes(res.into_body(), usize::MAX)
+            .await
+            .unwrap();
         assert_eq!(&bytes[..3], BOM);
         let teks = String::from_utf8_lossy(&bytes[3..]);
         assert_eq!(teks.lines().count(), 2501, "kepala + 2.500 baris");

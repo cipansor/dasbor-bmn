@@ -29,10 +29,7 @@ fn nama_satker(daftar: &[&SatkerBaris]) -> Vec<String> {
     daftar.iter().take(5).map(|s| s.nama.clone()).collect()
 }
 
-fn teratas<'a>(
-    satker: &'a [SatkerBaris],
-    nilai: impl Fn(&SatkerBaris) -> f64,
-) -> Vec<&'a SatkerBaris> {
+fn teratas(satker: &[SatkerBaris], nilai: impl Fn(&SatkerBaris) -> f64) -> Vec<&SatkerBaris> {
     let mut v: Vec<&SatkerBaris> = satker.iter().filter(|s| nilai(s) > 0.0).collect();
     v.sort_by(|a, b| nilai(b).total_cmp(&nilai(a)).then(a.nama.cmp(&b.nama)));
     v.truncate(5);
@@ -40,7 +37,10 @@ fn teratas<'a>(
 }
 
 /// Kategori dengan nilai terbesar menurut suatu ukuran.
-fn kategori_teratas(a: &Analisis, ukuran: impl Fn(&KategoriBaris) -> f64) -> Option<&KategoriBaris> {
+fn kategori_teratas(
+    a: &Analisis,
+    ukuran: impl Fn(&KategoriBaris) -> f64,
+) -> Option<&KategoriBaris> {
     a.kategori
         .iter()
         .filter(|c| ukuran(c) > 0.0)
@@ -335,13 +335,21 @@ pub fn susun(a: &Analisis, satker: &[SatkerBaris]) -> (Vec<Sorotan>, Vec<Rekomen
     if r.rb_5() >= 1.0 {
         let kat = kategori_teratas(a, |c| c.r.rb_5());
         tambah(
-            if r.rb_5() >= r.rb as f64 { "kritis" } else { "waspada" },
+            if r.rb_5() >= r.rb as f64 {
+                "kritis"
+            } else {
+                "waspada"
+            },
             "Prediksi rusak berat",
             format!(
                 "Sekitar {} unit lagi diperkirakan menjadi rusak berat sampai {akhir}{}.",
                 format_unit(r.rb_5()),
-                kat.map(|c| format!(", terbanyak pada {} (±{} unit)", c.label, format_unit(c.r.rb_5())))
-                    .unwrap_or_default()
+                kat.map(|c| format!(
+                    ", terbanyak pada {} (±{} unit)",
+                    c.label,
+                    format_unit(c.r.rb_5())
+                ))
+                .unwrap_or_default()
             ),
         );
     }
@@ -443,7 +451,11 @@ pub fn susun(a: &Analisis, satker: &[SatkerBaris]) -> (Vec<Sorotan>, Vec<Rekomen
         );
     }
     if a.kualitas.rasio_umur_sisa > 0.0 && !(0.6..=1.6).contains(&a.kualitas.rasio_umur_sisa) {
-        tambah("waspada", "Satuan sisa umur", a.kualitas.catatan_umur_sisa.clone());
+        tambah(
+            "waspada",
+            "Satuan sisa umur",
+            a.kualitas.catatan_umur_sisa.clone(),
+        );
     }
 
     // Rekomendasi.
@@ -606,7 +618,7 @@ pub fn susun(a: &Analisis, satker: &[SatkerBaris]) -> (Vec<Sorotan>, Vec<Rekomen
         });
     }
 
-    rek.sort_by(|x, y| x.prioritas.cmp(&y.prioritas));
+    rek.sort_by_key(|x| x.prioritas);
     (so, rek)
 }
 
@@ -635,7 +647,7 @@ pub fn untuk_satker(
             satker: vec![],
         });
     }
-    rek.sort_by(|x, y| x.prioritas.cmp(&y.prioritas));
+    rek.sort_by_key(|x| x.prioritas);
     rek
 }
 
@@ -720,15 +732,25 @@ mod tests {
         assert!(sorotan.len() >= 6);
         assert!(rek.len() >= 7, "{}", rek.len());
         assert!(rek.windows(2).all(|w| w[0].prioritas <= w[1].prioritas));
-        assert!(rek.iter().all(|r| !r.tindakan.is_empty() && !r.dasar.is_empty()));
+        assert!(rek
+            .iter()
+            .all(|r| !r.tindakan.is_empty() && !r.dasar.is_empty()));
         let hapus = rek.iter().find(|r| r.bidang == "Penghapusan").unwrap();
         assert_eq!(hapus.prioritas, 1, "10% rusak berat = prioritas tinggi");
         assert!(hapus.temuan.contains("80 unit"));
-        assert_eq!(hapus.satker[0], "Kejari A", "satker dengan tunggakan terbesar di depan");
+        assert_eq!(
+            hapus.satker[0], "Kejari A",
+            "satker dengan tunggakan terbesar di depan"
+        );
         // Kesenjangan pendanaan: moderat (3e10 + 6×2e9)/5 = 8,4 M/th vs 4 M/th.
-        let gap = rek.iter().find(|r| r.judul.contains("kesenjangan")).unwrap();
+        let gap = rek
+            .iter()
+            .find(|r| r.judul.contains("kesenjangan"))
+            .unwrap();
         assert!(gap.temuan.contains("2,1"), "{}", gap.temuan);
-        assert!(rek.iter().any(|r| r.bidang == "Pengawasan dan Pengendalian"));
+        assert!(rek
+            .iter()
+            .any(|r| r.bidang == "Pengawasan dan Pengendalian"));
         assert!(rek.iter().any(|r| r.judul.contains("kewajaran umur")));
     }
 

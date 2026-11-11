@@ -46,8 +46,16 @@ fn isi(a: Analisis) -> AnyView {
             vec![
                 Sel::Teks(format!("{} {}", c.icon, c.label)),
                 Sel::Teks(if c.fisik { "ya".into() } else { "tidak".into() }),
-                Sel::Teks(if c.disusutkan { "ya".into() } else { "tidak".into() }),
-                Sel::Angka(if c.disusutkan { format_desimal(c.masa_manfaat, 1) } else { "–".into() }),
+                Sel::Teks(if c.disusutkan {
+                    "ya".into()
+                } else {
+                    "tidak".into()
+                }),
+                Sel::Angka(if c.disusutkan {
+                    format_desimal(c.masa_manfaat, 1)
+                } else {
+                    "–".into()
+                }),
                 Sel::Teks(c.kebutuhan.clone()),
             ]
         })

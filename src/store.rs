@@ -158,9 +158,7 @@ fn naikkan(c: &Connection, key: &str) -> rusqlite::Result<i64> {
 
 /// Nomor versi data; berubah setiap kali isi suatu tabel diganti.
 pub fn versi_data() -> i64 {
-    get_meta("versi")
-        .and_then(|v| v.parse().ok())
-        .unwrap_or(0)
+    get_meta("versi").and_then(|v| v.parse().ok()).unwrap_or(0)
 }
 
 /// Apakah basis data saat ini berisi data contoh.
@@ -338,9 +336,7 @@ pub fn statuses_with_labels() -> Vec<SyncStatus> {
         .iter()
         .map(|t| {
             let found = semua.iter().find(|(n, _, _)| n == t.table);
-            let (count, at) = found
-                .map(|(_, c, a)| (*c, a.clone()))
-                .unwrap_or((0, None));
+            let (count, at) = found.map(|(_, c, a)| (*c, a.clone())).unwrap_or((0, None));
             SyncStatus {
                 table: t.table.to_string(),
                 label: t.label.to_string(),
@@ -747,7 +743,11 @@ mod tests {
         // Tulis generasi baru sebagian: pembaca tetap melihat isi lama.
         let gen = gen_baru().unwrap();
         sisip(t, gen, baris(3, "B"), 0).unwrap();
-        assert_eq!(stored_count(t), 5, "generasi setengah jadi tidak boleh terlihat");
+        assert_eq!(
+            stored_count(t),
+            5,
+            "generasi setengah jadi tidak boleh terlihat"
+        );
         let mut lama = 0;
         alir_baris(t, |v| {
             assert!(v["kd_brg"].as_str().unwrap().starts_with('L'));
@@ -784,7 +784,11 @@ mod tests {
             .unwrap()
         };
         batal(t, aktif);
-        assert_eq!(stored_count(t), 4, "generasi aktif tidak boleh ikut terhapus");
+        assert_eq!(
+            stored_count(t),
+            4,
+            "generasi aktif tidak boleh ikut terhapus"
+        );
     }
 
     #[test]

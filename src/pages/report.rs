@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 
-use crate::components::ui::{Catatan, ErrorBlock, KepalaHalaman, LoadingBlock, PitaData, SectionCard};
+use crate::components::ui::{
+    Catatan, ErrorBlock, KepalaHalaman, LoadingBlock, PitaData, SectionCard,
+};
 use crate::dto::SatkerBaris;
 use crate::server_fns::{get_meta, get_satker};
 
@@ -42,13 +44,28 @@ fn Formulir(satker: Vec<SatkerBaris>) -> impl IntoView {
         format!("/api/laporan.pdf?{}", q.join("&"))
     };
     let isi_nasional = [
-        ("📄", "Sampul dan ringkasan eksekutif: posisi, sorotan utama, skor kesehatan"),
-        ("✅", "Temuan dan rekomendasi berprioritas beserta rujukan ketentuan"),
+        (
+            "📄",
+            "Sampul dan ringkasan eksekutif: posisi, sorotan utama, skor kesehatan",
+        ),
+        (
+            "✅",
+            "Temuan dan rekomendasi berprioritas beserta rujukan ketentuan",
+        ),
         ("🩺", "Kondisi dan masa manfaat per kategori, profil umur"),
-        ("🔮", "Prediksi habis masa manfaat dan rusak berat per tahun"),
-        ("🧮", "Analisis kebutuhan tiga skenario, per kategori dan kelompok barang"),
+        (
+            "🔮",
+            "Prediksi habis masa manfaat dan rusak berat per tahun",
+        ),
+        (
+            "🧮",
+            "Analisis kebutuhan tiga skenario, per kategori dan kelompok barang",
+        ),
         ("📈", "Forecast perolehan dan perbandingan dengan kebutuhan"),
-        ("🏛️", "Peringkat provinsi dan lampiran rincian seluruh satuan kerja"),
+        (
+            "🏛️",
+            "Peringkat provinsi dan lampiran rincian seluruh satuan kerja",
+        ),
         ("📐", "Mutu data, metodologi, asumsi, dan keterbatasan"),
     ];
     view! {

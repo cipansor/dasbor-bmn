@@ -1,9 +1,7 @@
 use leptos::prelude::*;
 
 use crate::components::chart::BilahKondisi;
-use crate::components::ui::{
-    ErrorBlock, KepalaHalaman, LoadingBlock, PitaData, SectionCard,
-};
+use crate::components::ui::{ErrorBlock, KepalaHalaman, LoadingBlock, PitaData, SectionCard};
 use crate::dto::Analisis;
 use crate::model::{format_number, format_persen, format_rupiah_short};
 use crate::schema::COLUMN_COUNT;

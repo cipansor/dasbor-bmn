@@ -129,8 +129,22 @@ fn sampul(w: &mut Penulis, judul_besar: &str, sub: &str, m: &Meta, periode: &Per
     p.kotak(0.0, 0.0, A4_W, 6.0, UTAMA);
     p.kotak(MARGIN, 36.0, 44.0, 44.0, UTAMA);
     p.teks_tengah(MARGIN + 22.0, 64.0, 14.0, true, "#ffffff", "BMN");
-    p.teks(MARGIN + 56.0, 53.0, 13.0, true, "#ffffff", "Dasbor Analitik Barang Milik Negara");
-    p.teks(MARGIN + 56.0, 69.0, 8.5, false, "#93a2c4", "Kejaksaan Republik Indonesia");
+    p.teks(
+        MARGIN + 56.0,
+        53.0,
+        13.0,
+        true,
+        "#ffffff",
+        "Dasbor Analitik Barang Milik Negara",
+    );
+    p.teks(
+        MARGIN + 56.0,
+        69.0,
+        8.5,
+        false,
+        "#93a2c4",
+        "Kejaksaan Republik Indonesia",
+    );
     p.teks(
         MARGIN,
         112.0,
@@ -156,7 +170,11 @@ fn sampul(w: &mut Penulis, judul_besar: &str, sub: &str, m: &Meta, periode: &Per
         &format!(
             "Bulan pelaporan {}  |  posisi data {}  |  dicetak {}",
             periode.label(),
-            if m.tanggal_data.is_empty() { "-" } else { &m.tanggal_data },
+            if m.tanggal_data.is_empty() {
+                "-"
+            } else {
+                &m.tanggal_data
+            },
             m.dibuat
         ),
     );
@@ -228,7 +246,11 @@ fn bagian_kpi_utama(w: &mut Penulis, r: &Ringkas, skor: &Skor, m: &Meta) {
             "Kondisi baik".into(),
             pct(r.pct_baik(), r.kondisi_diketahui() > 0),
             format!("rusak ringan {}", unit(r.rr)),
-            if r.pct_baik() >= 85.0 { "emerald" } else { "amber" },
+            if r.pct_baik() >= 85.0 {
+                "emerald"
+            } else {
+                "amber"
+            },
         ),
         (
             "Skor kesehatan".into(),
@@ -245,7 +267,10 @@ fn bagian_kpi_utama(w: &mut Penulis, r: &Ringkas, skor: &Skor, m: &Meta) {
         (
             "Habis masa manfaat".into(),
             format!("{} unit", unit(r.habis)),
-            format!("{} dari yang disusutkan", pct(r.pct_habis(), r.susut_unit > 0)),
+            format!(
+                "{} dari yang disusutkan",
+                pct(r.pct_habis(), r.susut_unit > 0)
+            ),
             "violet",
         ),
         (
@@ -291,7 +316,14 @@ fn grafik_proyeksi(w: &mut Penulis, r: &Ringkas, m: &Meta) {
     let label: Vec<String> = (0..NH).map(|k| m.label_tahun(k)).collect();
     let y = w.bidang(150.0);
     let setengah = (LEBAR - 14.0) / 2.0;
-    w.hal.teks(MARGIN, y + 8.0, 8.3, true, TEKS, "Habis masa manfaat per tahun (unit)");
+    w.hal.teks(
+        MARGIN,
+        y + 8.0,
+        8.3,
+        true,
+        TEKS,
+        "Habis masa manfaat per tahun (unit)",
+    );
     kolom(
         &mut w.hal,
         MARGIN,
@@ -308,7 +340,14 @@ fn grafik_proyeksi(w: &mut Penulis, r: &Ringkas, m: &Meta) {
         None,
     );
     let x2 = MARGIN + setengah + 14.0;
-    w.hal.teks(x2, y + 8.0, 8.3, true, TEKS, "Perkiraan rusak berat baru per tahun (unit)");
+    w.hal.teks(
+        x2,
+        y + 8.0,
+        8.3,
+        true,
+        TEKS,
+        "Perkiraan rusak berat baru per tahun (unit)",
+    );
     kolom(
         &mut w.hal,
         x2,
@@ -363,16 +402,32 @@ fn daftar_aset(w: &mut Penulis, aset: &[AsetRisiko], dengan_satker: bool, dengan
         .iter()
         .map(|a| {
             let mut v = vec![
-                if a.nama.is_empty() { a.kelompok.clone() } else { a.nama.clone() },
+                if a.nama.is_empty() {
+                    a.kelompok.clone()
+                } else {
+                    a.nama.clone()
+                },
                 a.kategori.clone(),
             ];
             if dengan_satker {
                 v.push(a.satker.clone());
             }
-            v.push(if a.tahun > 0 { a.tahun.to_string() } else { "-".into() });
-            v.push(if a.umur >= 0.0 { format_desimal(a.umur, 1) } else { "-".into() });
+            v.push(if a.tahun > 0 {
+                a.tahun.to_string()
+            } else {
+                "-".into()
+            });
+            v.push(if a.umur >= 0.0 {
+                format_desimal(a.umur, 1)
+            } else {
+                "-".into()
+            });
             v.push(a.kondisi.clone());
-            v.push(if a.sisa >= 0.0 { format_desimal(a.sisa, 1) } else { "-".into() });
+            v.push(if a.sisa >= 0.0 {
+                format_desimal(a.sisa, 1)
+            } else {
+                "-".into()
+            });
             v.push(rp(a.nilai));
             if dengan_peluang {
                 v.push(format_persen(a.p_rb * 100.0));
@@ -444,7 +499,13 @@ pub fn bangun_nasional(
     ));
     bagian_kpi_utama(&mut w, r, &a.skor, m);
     if let Some(d) = &a.delta {
-        let tanda = |v: i64| if v > 0 { format!("+{}", unit(v)) } else { unit(v) };
+        let tanda = |v: i64| {
+            if v > 0 {
+                format!("+{}", unit(v))
+            } else {
+                unit(v)
+            }
+        };
         w.catatan(&format!(
             "Perubahan sejak posisi {}: {} unit; rusak berat {}; habis masa manfaat {}; idle {}; hilang {}.",
             d.tanggal,
@@ -535,17 +596,36 @@ pub fn bangun_nasional(
         146.0,
         &label,
         &[
-            SeriPdf { nama: "Baik", warna: C_BAIK, nilai: a.umur.iter().map(|u| u.baik as f64).collect() },
-            SeriPdf { nama: "Rusak ringan", warna: C_RR, nilai: a.umur.iter().map(|u| u.rr as f64).collect() },
-            SeriPdf { nama: "Rusak berat", warna: C_RB, nilai: a.umur.iter().map(|u| u.rb as f64).collect() },
-            SeriPdf { nama: "Tidak diisi", warna: C_TAK, nilai: a.umur.iter().map(|u| u.tak as f64).collect() },
+            SeriPdf {
+                nama: "Baik",
+                warna: C_BAIK,
+                nilai: a.umur.iter().map(|u| u.baik as f64).collect(),
+            },
+            SeriPdf {
+                nama: "Rusak ringan",
+                warna: C_RR,
+                nilai: a.umur.iter().map(|u| u.rr as f64).collect(),
+            },
+            SeriPdf {
+                nama: "Rusak berat",
+                warna: C_RB,
+                nilai: a.umur.iter().map(|u| u.rb as f64).collect(),
+            },
+            SeriPdf {
+                nama: "Tidak diisi",
+                warna: C_TAK,
+                nilai: a.umur.iter().map(|u| u.tak as f64).collect(),
+            },
         ],
         &fmt_unit,
         None,
     );
 
     // 4. Prediksi lima tahun.
-    w.bab("Prediksi Lima Tahun", Some(&format!("sampai akhir {akhir}")));
+    w.bab(
+        "Prediksi Lima Tahun",
+        Some(&format!("sampai akhir {akhir}")),
+    );
     grafik_proyeksi(&mut w, r, m);
     w.sub("Jadwal habis masa manfaat per kategori (unit)");
     tabel_tahun(
@@ -573,7 +653,9 @@ pub fn bangun_nasional(
             .collect(),
         Some(("Seluruh kategori".into(), r.rb as f64, r.rb_th, None)),
     );
-    w.catatan("Kolom Total pada kedua tabel = posisi kini ditambah proyeksi sampai akhir cakrawala.");
+    w.catatan(
+        "Kolom Total pada kedua tabel = posisi kini ditambah proyeksi sampai akhir cakrawala.",
+    );
     w.sub("Parameter model kerusakan");
     w.tabel(
         &[
@@ -593,7 +675,11 @@ pub fn bangun_nasional(
                     format_desimal(x.median_mulai, 1),
                     format_desimal(x.lama_rr, 1),
                     format_desimal(x.mae, 1),
-                    if x.gabungan { "kurva gabungan".into() } else { "data kategori".into() },
+                    if x.gabungan {
+                        "kurva gabungan".into()
+                    } else {
+                        "data kategori".into()
+                    },
                 ]
             })
             .collect::<Vec<_>>(),
@@ -604,7 +690,10 @@ pub fn bangun_nasional(
     daftar_aset(&mut w, &risiko, true, true);
 
     // 5. Analisis kebutuhan.
-    w.bab("Analisis Kebutuhan Lima Tahun", Some("penggantian dan rehabilitasi aset yang ada"));
+    w.bab(
+        "Analisis Kebutuhan Lima Tahun",
+        Some("penggantian dan rehabilitasi aset yang ada"),
+    );
     let per_tahun = r.biaya_total(1) / HORIZON as f64;
     w.paragraf(&format!(
         "Skenario moderat memerlukan {} unit dengan perkiraan biaya {} sampai {akhir}, atau rata-rata {} per tahun. \
@@ -637,9 +726,14 @@ pub fn bangun_nasional(
         LEBAR,
         146.0,
         &label,
-        &[SeriPdf { nama: "Biaya", warna: C_BIRU2, nilai: biaya }],
+        &[SeriPdf {
+            nama: "Biaya",
+            warna: C_BIRU2,
+            nilai: biaya,
+        }],
         &fmt_rp,
-        (a.kapasitas.nilai_per_tahun > 0.0).then_some((a.kapasitas.nilai_per_tahun, teks_acuan.as_str())),
+        (a.kapasitas.nilai_per_tahun > 0.0)
+            .then_some((a.kapasitas.nilai_per_tahun, teks_acuan.as_str())),
     );
     w.sub("Kebutuhan per kategori - skenario moderat (unit)");
     tabel_tahun(
@@ -689,7 +783,11 @@ pub fn bangun_nasional(
                     unit_f(k.unit[1]),
                     rp(k.harga),
                     rp(k.biaya[1]),
-                    if k.idle_baik > 0 { unit(k.idle_baik) } else { "-".into() },
+                    if k.idle_baik > 0 {
+                        unit(k.idle_baik)
+                    } else {
+                        "-".into()
+                    },
                 ]
             })
             .collect::<Vec<_>>(),
@@ -706,7 +804,16 @@ pub fn bangun_nasional(
     if let Some(total) = a.prakiraan.first() {
         w.sub("Jumlah unit perolehan per tahun - seluruh kategori");
         let y = w.bidang(140.0);
-        garis_ramal(&mut w.hal, MARGIN, y, LEBAR, 136.0, &total.unit.riwayat, &total.unit.ramal, &fmt_unit);
+        garis_ramal(
+            &mut w.hal,
+            MARGIN,
+            y,
+            LEBAR,
+            136.0,
+            &total.unit.riwayat,
+            &total.unit.ramal,
+            &fmt_unit,
+        );
         w.catatan(&format!(
             "Garis utuh = realisasi tahun penuh; garis putus = prakiraan; pita = rentang 80%. Metode: {}; galat uji balik {}.",
             total.unit.metode,
@@ -733,7 +840,11 @@ pub fn bangun_nasional(
             .map(|p| {
                 let mut v = vec![p.label.clone()];
                 v.extend(p.unit.ramal.iter().map(|t| unit_f(t.nilai)));
-                v.push(if p.unit.galat < 0.0 { "-".into() } else { format_persen(p.unit.galat) });
+                v.push(if p.unit.galat < 0.0 {
+                    "-".into()
+                } else {
+                    format_persen(p.unit.galat)
+                });
                 v.push(p.unit.metode.clone());
                 v
             })
@@ -754,7 +865,11 @@ pub fn bangun_nasional(
         ));
         if !aktivitas.per_kategori.is_empty() {
             w.tabel(
-                &[kiri("Kategori", 4.0), kanan("Unit", 1.2), kanan("Nilai", 1.6)],
+                &[
+                    kiri("Kategori", 4.0),
+                    kanan("Unit", 1.2),
+                    kanan("Nilai", 1.6),
+                ],
                 &aktivitas
                     .per_kategori
                     .iter()
@@ -766,7 +881,10 @@ pub fn bangun_nasional(
     }
 
     // 7. Wilayah.
-    w.bab("Sebaran per Provinsi", Some("menurut lokasi aset, urut nilai"));
+    w.bab(
+        "Sebaran per Provinsi",
+        Some("menurut lokasi aset, urut nilai"),
+    );
     w.tabel(
         &[
             kiri("Provinsi", 3.0),
@@ -836,11 +954,23 @@ pub fn bangun_nasional(
         ]
     };
     w.sub("Skor kesehatan terendah");
-    w.tabel(&kol_satker(), &a.satker_skor.iter().map(baris_satker).collect::<Vec<_>>(), None);
+    w.tabel(
+        &kol_satker(),
+        &a.satker_skor.iter().map(baris_satker).collect::<Vec<_>>(),
+        None,
+    );
     w.sub("Kebutuhan biaya terbesar (skenario moderat)");
-    w.tabel(&kol_satker(), &a.satker_butuh.iter().map(baris_satker).collect::<Vec<_>>(), None);
+    w.tabel(
+        &kol_satker(),
+        &a.satker_butuh.iter().map(baris_satker).collect::<Vec<_>>(),
+        None,
+    );
     w.sub("Kerusakan paling jauh di atas kewajaran umur (RKU)");
-    w.tabel(&kol_satker(), &a.satker_rku.iter().map(baris_satker).collect::<Vec<_>>(), None);
+    w.tabel(
+        &kol_satker(),
+        &a.satker_rku.iter().map(baris_satker).collect::<Vec<_>>(),
+        None,
+    );
     w.catatan("RKU = Rasio Kerusakan terstandar Umur: aset tidak baik yang teramati dibagi yang wajar menurut umur aset. Di atas 1 berarti lebih rusak daripada wajarnya.");
 
     // 9. Mutu data.
@@ -869,7 +999,11 @@ pub fn bangun_nasional(
         None,
     );
     w.tabel(
-        &[kiri("Temuan administrasi", 5.0), kanan("Jumlah", 1.0), kanan("Nilai", 1.3)],
+        &[
+            kiri("Temuan administrasi", 5.0),
+            kanan("Jumlah", 1.0),
+            kanan("Nilai", 1.3),
+        ],
         &a.kualitas
             .anomali
             .iter()
@@ -878,7 +1012,11 @@ pub fn bangun_nasional(
                 vec![
                     x.judul.clone(),
                     unit(x.jumlah),
-                    if x.nilai > 0.0 { rp(x.nilai) } else { "-".into() },
+                    if x.nilai > 0.0 {
+                        rp(x.nilai)
+                    } else {
+                        "-".into()
+                    },
                 ]
             })
             .collect::<Vec<_>>(),
@@ -890,7 +1028,10 @@ pub fn bangun_nasional(
 
     // Lampiran: seluruh satuan kerja.
     w.halaman_baru();
-    w.bab("Lampiran - Rincian Seluruh Satuan Kerja", Some("urut provinsi lalu nama"));
+    w.bab(
+        "Lampiran - Rincian Seluruh Satuan Kerja",
+        Some("urut provinsi lalu nama"),
+    );
     let mut semua: Vec<&SatkerBaris> = satker.iter().collect();
     semua.sort_by(|x, y| x.prov.cmp(&y.prov).then(x.nama.cmp(&y.nama)));
     w.tabel(
@@ -913,12 +1054,21 @@ pub fn bangun_satker(s: &SatkerRinci, periode: &Periode) -> Vec<u8> {
     sampul(
         &mut w,
         &s.nama,
-        &format!("Profil Barang Milik Negara  |  {}  |  kode {}", s.prov, s.kode),
+        &format!(
+            "Profil Barang Milik Negara  |  {}  |  kode {}",
+            s.prov, s.kode
+        ),
         m,
         periode,
     );
 
-    w.bab("Ringkasan", Some(&format!("peringkat {} dari {} satuan kerja", s.peringkat, s.dari)));
+    w.bab(
+        "Ringkasan",
+        Some(&format!(
+            "peringkat {} dari {} satuan kerja",
+            s.peringkat, s.dari
+        )),
+    );
     let (predikat, _) = Skor::predikat(s.skor.total);
     let banding = |nilai: f64, nasional: f64, tinggi_baik: bool| {
         let lebih = (nilai >= nasional) == tinggi_baik;
@@ -960,7 +1110,14 @@ pub fn bangun_satker(s: &SatkerRinci, periode: &Periode) -> Vec<u8> {
     ];
     for ((nama, bobot, _), nilai) in BOBOT_SKOR.iter().zip(komponen) {
         let y = w.bidang(15.0);
-        w.hal.teks(MARGIN, y + 9.0, 8.0, false, TEKS, &format!("{nama} (bobot {:.0}%)", bobot * 100.0));
+        w.hal.teks(
+            MARGIN,
+            y + 9.0,
+            8.0,
+            false,
+            TEKS,
+            &format!("{nama} (bobot {:.0}%)", bobot * 100.0),
+        );
         bilah_nilai(
             &mut w.hal,
             MARGIN + 170.0,
@@ -968,9 +1125,22 @@ pub fn bangun_satker(s: &SatkerRinci, periode: &Periode) -> Vec<u8> {
             LEBAR - 215.0,
             6.5,
             nilai,
-            if nilai >= 80.0 { C_BAIK } else if nilai >= 65.0 { C_RR } else { C_RB },
+            if nilai >= 80.0 {
+                C_BAIK
+            } else if nilai >= 65.0 {
+                C_RR
+            } else {
+                C_RB
+            },
         );
-        w.hal.teks_kanan(MARGIN + LEBAR, y + 9.0, 8.0, true, TINTA, &format_desimal(nilai, 1));
+        w.hal.teks_kanan(
+            MARGIN + LEBAR,
+            y + 9.0,
+            8.0,
+            true,
+            TINTA,
+            &format_desimal(nilai, 1),
+        );
     }
     w.jarak(4.0);
     w.sub("Sebaran kondisi aset fisik");
@@ -994,13 +1164,16 @@ pub fn bangun_satker(s: &SatkerRinci, periode: &Periode) -> Vec<u8> {
     );
 
     if !s.rekomendasi.is_empty() {
-            w.bab("Rekomendasi Tindak Lanjut", Some("urut prioritas"));
+        w.bab("Rekomendasi Tindak Lanjut", Some("urut prioritas"));
         for (i, x) in s.rekomendasi.iter().enumerate() {
             w.rekomendasi(i + 1, x);
         }
     }
 
-    w.bab("Prediksi dan Kebutuhan Lima Tahun", Some(&format!("sampai akhir {akhir}")));
+    w.bab(
+        "Prediksi dan Kebutuhan Lima Tahun",
+        Some(&format!("sampai akhir {akhir}")),
+    );
     grafik_proyeksi(&mut w, r, m);
     w.sub("Kebutuhan per skenario (unit)");
     tabel_skenario(&mut w, r, m);
@@ -1076,7 +1249,10 @@ mod tests {
     #[test]
     fn laporan_nasional_lengkap_dan_sah() {
         let h = contoh();
-        let periode = Periode { tahun: 2026, bulan: 6 };
+        let periode = Periode {
+            tahun: 2026,
+            bulan: 6,
+        };
         let aktivitas = AktivitasPeriode {
             label: periode.label(),
             unit_bulan: 12,
@@ -1106,7 +1282,10 @@ mod tests {
             assert!(teks.contains(bagian), "bagian hilang: {bagian}");
         }
         assert!(teks.contains("Laporan Analitik BMN - Juni 2026"));
-        assert!(teks.contains("DATA CONTOH"), "laporan data contoh wajib bertanda");
+        assert!(
+            teks.contains("DATA CONTOH"),
+            "laporan data contoh wajib bertanda"
+        );
         // Seluruh satuan kerja masuk lampiran.
         assert!(teks.contains("Kejaksaan Negeri Jayawijaya"));
         // Penomoran halaman memakai jumlah halaman sebenarnya.
@@ -1123,11 +1302,20 @@ mod tests {
         let b = bangun_nasional(
             &Analisis::default(),
             &[],
-            &Periode { tahun: 2026, bulan: 1 },
+            &Periode {
+                tahun: 2026,
+                bulan: 1,
+            },
             &AktivitasPeriode::default(),
         );
         assert!(String::from_utf8_lossy(&b).starts_with("%PDF-1.4"));
-        let b = bangun_satker(&SatkerRinci::default(), &Periode { tahun: 2026, bulan: 1 });
+        let b = bangun_satker(
+            &SatkerRinci::default(),
+            &Periode {
+                tahun: 2026,
+                bulan: 1,
+            },
+        );
         assert!(String::from_utf8_lossy(&b).starts_with("%PDF-1.4"));
     }
 
@@ -1135,13 +1323,22 @@ mod tests {
     fn periode_parsing() {
         assert_eq!(
             Periode::dari_str("2026-10"),
-            Some(Periode { tahun: 2026, bulan: 10 })
+            Some(Periode {
+                tahun: 2026,
+                bulan: 10
+            })
         );
         assert_eq!(Periode::dari_str("2026-13"), None);
         assert_eq!(Periode::dari_str("x"), None);
-        let p = Periode { tahun: 2024, bulan: 2 };
+        let p = Periode {
+            tahun: 2024,
+            bulan: 2,
+        };
         assert_eq!(p.label(), "Februari 2024");
         assert_eq!(p.kode(), "2024-02");
-        assert_eq!(tanggal_pdf("2026-11-10 13:05 WIB"), "D:20261110130500+07'00'");
+        assert_eq!(
+            tanggal_pdf("2026-11-10 13:05 WIB"),
+            "D:20261110130500+07'00'"
+        );
     }
 }

@@ -233,7 +233,11 @@ impl Sel {
 }
 
 fn lihat_sel(s: Sel, tebal: bool) -> AnyView {
-    let dasar = if tebal { "px-3 py-2 font-semibold" } else { "px-3 py-2" };
+    let dasar = if tebal {
+        "px-3 py-2 font-semibold"
+    } else {
+        "px-3 py-2"
+    };
     match s {
         Sel::Teks(t) => view! { <td class=dasar>{t}</td> }.into_any(),
         Sel::Angka(t) => {
@@ -410,9 +414,11 @@ pub fn Catatan(children: Children) -> impl IntoView {
 pub fn TabelAset(
     aset: Vec<AsetRisiko>,
     /// Tampilkan kolom satuan kerja (untuk daftar nasional).
-    #[prop(default = true)] dengan_satker: bool,
+    #[prop(default = true)]
+    dengan_satker: bool,
     /// Tampilkan kolom peluang rusak berat.
-    #[prop(default = true)] dengan_peluang: bool,
+    #[prop(default = true)]
+    dengan_peluang: bool,
 ) -> impl IntoView {
     let mut kep = vec!["Aset", "Kategori"];
     if dengan_satker {
@@ -427,16 +433,31 @@ pub fn TabelAset(
         .map(|a| {
             let mut sel = vec![
                 Sel::Ganda(
-                    if a.nama.is_empty() { a.kelompok.clone() } else { a.nama.clone() },
+                    if a.nama.is_empty() {
+                        a.kelompok.clone()
+                    } else {
+                        a.nama.clone()
+                    },
                     format!("{} · No. {}", a.kd_brg, a.no_aset),
                 ),
                 Sel::Ganda(a.kategori.clone(), a.kelompok.clone()),
             ];
             if dengan_satker {
-                sel.push(Sel::Tautan(a.satker.clone(), format!("/satker/{}", a.kode_satker)));
+                sel.push(Sel::Tautan(
+                    a.satker.clone(),
+                    format!("/satker/{}", a.kode_satker),
+                ));
             }
-            sel.push(Sel::Angka(if a.tahun > 0 { a.tahun.to_string() } else { "–".into() }));
-            sel.push(Sel::Angka(if a.umur >= 0.0 { format!("{} th", format_desimal(a.umur, 1)) } else { "–".into() }));
+            sel.push(Sel::Angka(if a.tahun > 0 {
+                a.tahun.to_string()
+            } else {
+                "–".into()
+            }));
+            sel.push(Sel::Angka(if a.umur >= 0.0 {
+                format!("{} th", format_desimal(a.umur, 1))
+            } else {
+                "–".into()
+            }));
             sel.push(Sel::Lencana(
                 a.kondisi.clone(),
                 match a.kondisi.as_str() {
@@ -446,7 +467,11 @@ pub fn TabelAset(
                     _ => "slate",
                 },
             ));
-            sel.push(Sel::Angka(if a.sisa >= 0.0 { format!("{} th", format_desimal(a.sisa, 1)) } else { "–".into() }));
+            sel.push(Sel::Angka(if a.sisa >= 0.0 {
+                format!("{} th", format_desimal(a.sisa, 1))
+            } else {
+                "–".into()
+            }));
             sel.push(Sel::rupiah(a.nilai));
             if dengan_peluang {
                 sel.push(Sel::persen(a.p_rb * 100.0));

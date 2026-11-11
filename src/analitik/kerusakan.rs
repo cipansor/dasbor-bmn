@@ -52,7 +52,11 @@ fn jepit(p: f64) -> f64 {
 impl Param {
     /// Parameter cadangan dari masa manfaat ketika data tidak cukup.
     pub fn bawaan(masa_manfaat: f64) -> Param {
-        let masa = if masa_manfaat > 0.0 { masa_manfaat } else { 10.0 };
+        let masa = if masa_manfaat > 0.0 {
+            masa_manfaat
+        } else {
+            10.0
+        };
         Param {
             eta: 1.7 * masa,
             beta: 2.3,
@@ -124,11 +128,7 @@ impl Param {
 }
 
 fn kemungkinan_baik(data: &[Hitung], eta: f64, beta: f64) -> f64 {
-    let p = Param {
-        eta,
-        beta,
-        mu: 0.2,
-    };
+    let p = Param { eta, beta, mu: 0.2 };
     let mut ll = 0.0;
     for (i, h) in data.iter().enumerate() {
         if h.n <= 0.0 {
@@ -221,7 +221,8 @@ pub fn mae(data: &[Hitung], p: &Param) -> f64 {
         let a = i as f64 + 0.5;
         let obs_tb = (h.n - h.baik) / h.n;
         let obs_rb = h.rb / h.n;
-        jumlah += h.n * ((obs_tb - (1.0 - p.s_baik(a, 1.0))).abs() + (obs_rb - p.p_rb(a, 1.0)).abs())
+        jumlah += h.n
+            * ((obs_tb - (1.0 - p.s_baik(a, 1.0))).abs() + (obs_rb - p.p_rb(a, 1.0)).abs())
             / 2.0;
         bobot += h.n;
     }
@@ -281,7 +282,10 @@ mod tests {
         let batas = [0.2, 1.2, 2.2, 3.2, 4.2, 5.2];
         let l = p.lintasan_baik(6.0, 1.0, &batas);
         for w in l.windows(2) {
-            assert!(w[1].0 >= w[0].0 && w[1].1 >= w[0].1, "peluang kumulatif naik");
+            assert!(
+                w[1].0 >= w[0].0 && w[1].1 >= w[0].1,
+                "peluang kumulatif naik"
+            );
         }
         for (i, (tb, rb)) in l.iter().enumerate() {
             assert!(rb <= tb, "rusak berat bagian dari tidak baik");
@@ -325,7 +329,11 @@ mod tests {
         let data = simulasi(&asli, 400, 22, 42);
         let p = taksir(&data).expect("sampel cukup");
         assert!((p.eta - asli.eta).abs() / asli.eta < 0.08, "eta {}", p.eta);
-        assert!((p.beta - asli.beta).abs() / asli.beta < 0.12, "beta {}", p.beta);
+        assert!(
+            (p.beta - asli.beta).abs() / asli.beta < 0.12,
+            "beta {}",
+            p.beta
+        );
         assert!((p.mu - asli.mu).abs() / asli.mu < 0.15, "mu {}", p.mu);
         assert!(mae(&data, &p) < 2.0, "mae {}", mae(&data, &p));
     }

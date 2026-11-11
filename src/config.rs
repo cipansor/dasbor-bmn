@@ -180,7 +180,11 @@ pub fn asumsi() -> crate::dto::Asumsi {
             .satuan_umur_sisa
             .as_deref()
             .and_then(satuan_sah)
-            .or_else(|| env_any(&["BMN_SATUAN_UMUR_SISA"]).as_deref().and_then(satuan_sah))
+            .or_else(|| {
+                env_any(&["BMN_SATUAN_UMUR_SISA"])
+                    .as_deref()
+                    .and_then(satuan_sah)
+            })
             .unwrap_or(bawaan.satuan_umur_sisa),
     }
 }

@@ -296,9 +296,15 @@ pub fn ekstrak(row: &Value, idx: usize) -> Kolom {
     );
     set(terisi(&teks(row, &["no_perkara_hukum"])), F_SENGKETA);
     let sbsn = teks(row, &["status_sbsn"]).to_lowercase();
-    set(terisi(&sbsn) && !sbsn.starts_with("non") && sbsn != "n", F_SBSN);
+    set(
+        terisi(&sbsn) && !sbsn.starts_with("non") && sbsn != "n",
+        F_SBSN,
+    );
     let intra = teks(row, &["intra_extra"]).to_lowercase();
-    set(intra.contains("ekstra") || intra.contains("extra"), F_EKSTRA);
+    set(
+        intra.contains("ekstra") || intra.contains("extra"),
+        F_EKSTRA,
+    );
     set(terisi(&teks(row, &["nm_penghuni"])), F_PENGHUNI);
     set(angka(row, "jml_photo") > 0.0, F_FOTO);
     set(
@@ -347,7 +353,12 @@ pub fn judul(s: &str) -> String {
             continue;
         }
         let bawah = kata.to_lowercase();
-        if i > 0 && matches!(bawah.as_str(), "dan" | "di" | "ke" | "dari" | "pada" | "yang") {
+        if i > 0
+            && matches!(
+                bawah.as_str(),
+                "dan" | "di" | "ke" | "dari" | "pada" | "yang"
+            )
+        {
             out.push_str(&bawah);
             continue;
         }
@@ -383,7 +394,10 @@ mod tests {
     #[test]
     fn tanggal_berbagai_bentuk() {
         assert_eq!(parse_tanggal("2019-05-01 00:00:00"), Some((2019, 5, 1)));
-        assert_eq!(parse_tanggal("2019-05-01T00:00:00.000Z"), Some((2019, 5, 1)));
+        assert_eq!(
+            parse_tanggal("2019-05-01T00:00:00.000Z"),
+            Some((2019, 5, 1))
+        );
         assert_eq!(parse_tanggal("01-05-2019"), Some((2019, 5, 1)));
         assert_eq!(parse_tanggal("31/12/2020"), Some((2020, 12, 31)));
         assert_eq!(parse_tanggal("20210817"), Some((2021, 8, 17)));
@@ -439,7 +453,10 @@ mod tests {
         assert_eq!(k.kunci, "i:3");
         assert_eq!(k.kode_satker, "TANPA-SATKER");
         // Nilai buku nol sah bila aset memang sudah tersusut penuh.
-        let k = ekstrak(&json!({"rph_aset": 100, "rph_susut": 100, "rph_buku": 0}), 0);
+        let k = ekstrak(
+            &json!({"rph_aset": 100, "rph_susut": 100, "rph_buku": 0}),
+            0,
+        );
         assert_eq!(k.buku, 0.0);
         // Nilai buku nol tanpa penyusutan dianggap tidak diisi.
         let k = ekstrak(&json!({"rph_aset": 100, "rph_susut": 0, "rph_buku": 0}), 0);
@@ -463,13 +480,19 @@ mod tests {
 
     #[test]
     fn nama_dirapikan() {
-        assert_eq!(judul("KEJAKSAAN NEGERI BANDUNG"), "Kejaksaan Negeri Bandung");
+        assert_eq!(
+            judul("KEJAKSAAN NEGERI BANDUNG"),
+            "Kejaksaan Negeri Bandung"
+        );
         assert_eq!(
             judul("KEJAKSAAN TINGGI DKI JAKARTA"),
             "Kejaksaan Tinggi DKI Jakarta"
         );
         assert_eq!(judul("DI YOGYAKARTA"), "DI Yogyakarta");
         assert_eq!(judul("jalan dan jembatan"), "Jalan dan Jembatan");
-        assert_eq!(judul("KEPULAUAN BANGKA-BELITUNG"), "Kepulauan Bangka-Belitung");
+        assert_eq!(
+            judul("KEPULAUAN BANGKA-BELITUNG"),
+            "Kepulauan Bangka-Belitung"
+        );
     }
 }

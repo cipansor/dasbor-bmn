@@ -32,7 +32,7 @@ impl Metode {
 }
 
 fn rata3(y: &[f64], langkah: usize) -> Vec<f64> {
-    let k = y.len().min(3).max(1);
+    let k = y.len().clamp(1, 3);
     let m = y[y.len() - k..].iter().sum::<f64>() / k as f64;
     vec![m; langkah]
 }
@@ -117,10 +117,7 @@ fn uji_balik(m: Metode, y: &[f64]) -> Option<(f64, f64)> {
         };
         kuadrat += (f - a).powi(2);
     }
-    Some((
-        smape / putaran as f64,
-        (kuadrat / putaran as f64).sqrt(),
-    ))
+    Some((smape / putaran as f64, (kuadrat / putaran as f64).sqrt()))
 }
 
 /// Ramal `langkah` tahun ke depan dari riwayat tahunan (tahun menaik, tahun penuh).
@@ -196,7 +193,10 @@ mod tests {
 
     #[test]
     fn tren_naik_dilanjutkan() {
-        let d = ramal(&deret(&[10., 12., 14., 16., 18., 20., 22., 24., 26., 28.]), 5);
+        let d = ramal(
+            &deret(&[10., 12., 14., 16., 18., 20., 22., 24., 26., 28.]),
+            5,
+        );
         assert_eq!(d.ramal.len(), 5);
         assert_eq!(d.ramal[0].tahun, 2020);
         assert!((d.ramal[0].nilai - 30.0).abs() < 1.5, "{:?}", d.ramal[0]);
@@ -210,7 +210,10 @@ mod tests {
         let d = ramal(&deret(&[50.0; 8]), 5);
         for t in &d.ramal {
             assert!((t.nilai - 50.0).abs() < 1e-6);
-            assert!((t.atas - t.bawah).abs() < 1e-6, "tanpa variasi, rentang nol");
+            assert!(
+                (t.atas - t.bawah).abs() < 1e-6,
+                "tanpa variasi, rentang nol"
+            );
         }
         assert!(d.galat.abs() < 1e-9);
     }
@@ -225,7 +228,10 @@ mod tests {
             );
         }
         assert!(d.ramal.iter().all(|t| t.bawah >= 0.0 && t.nilai >= 0.0));
-        assert!(d.ramal.iter().all(|t| t.bawah <= t.nilai && t.nilai <= t.atas));
+        assert!(d
+            .ramal
+            .iter()
+            .all(|t| t.bawah <= t.nilai && t.nilai <= t.atas));
     }
 
     #[test]

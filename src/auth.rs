@@ -467,8 +467,7 @@ pub async fn gerbang(req: Request, next: Next) -> Response {
 }
 
 async fn gerbang_dalam(req: Request, next: Next, path: &str) -> Response {
-
-    if JALAN_BEBAS.iter().any(|p| path == *p) {
+    if JALAN_BEBAS.contains(&path) {
         return next.run(req).await;
     }
 

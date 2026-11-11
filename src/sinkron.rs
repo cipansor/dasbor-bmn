@@ -243,6 +243,9 @@ mod tests {
     fn tabel_tak_dikenal_ditolak_sebelum_mulai() {
         let e = mulai(&["BUKAN_TABEL".to_string()]).unwrap_err();
         assert!(e.contains("tidak dikenal"));
-        assert!(!progres().berjalan, "pekerjaan tidak boleh tercatat berjalan");
+        assert!(
+            !progres().berjalan,
+            "pekerjaan tidak boleh tercatat berjalan"
+        );
     }
 }

@@ -14,7 +14,7 @@ pub fn KondisiPage() -> impl IntoView {
 }
 
 fn isi(a: Analisis) -> AnyView {
-    let r = a.nasional.clone();
+    let r = a.nasional;
     let baris: Vec<Vec<Sel>> = a
         .kategori
         .iter()
@@ -24,13 +24,37 @@ fn isi(a: Analisis) -> AnyView {
                 Sel::Teks(format!("{} {}", c.icon, c.label)),
                 Sel::unit(k.unit),
                 Sel::persen_bila(k.pct_baik(), c.fisik && k.kondisi_diketahui() > 0),
-                Sel::Angka(if c.fisik { format_number(k.rr) } else { "–".into() }),
-                Sel::Angka(if c.fisik { format_number(k.rb) } else { "–".into() }),
-                Sel::Angka(if c.fisik { format_rupiah_short(k.nilai_rb) } else { "–".into() }),
-                Sel::Angka(if c.disusutkan { format_number(k.habis) } else { "–".into() }),
+                Sel::Angka(if c.fisik {
+                    format_number(k.rr)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.fisik {
+                    format_number(k.rb)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.fisik {
+                    format_rupiah_short(k.nilai_rb)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.disusutkan {
+                    format_number(k.habis)
+                } else {
+                    "–".into()
+                }),
                 Sel::persen_bila(k.pct_habis(), c.disusutkan && k.susut_unit > 0),
-                Sel::Angka(if k.umur_n > 0 { format_desimal(k.umur_rata(), 1) } else { "–".into() }),
-                Sel::Angka(if c.disusutkan { format_desimal(c.masa_manfaat, 1) } else { "–".into() }),
+                Sel::Angka(if k.umur_n > 0 {
+                    format_desimal(k.umur_rata(), 1)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.disusutkan {
+                    format_desimal(c.masa_manfaat, 1)
+                } else {
+                    "–".into()
+                }),
                 Sel::unit(k.idle),
                 Sel::unit(k.hilang),
             ]
@@ -62,10 +86,26 @@ fn isi(a: Analisis) -> AnyView {
             .collect()
     };
     let umur_seri = vec![
-        Seri { nama: "Baik".into(), warna: W_BAIK, nilai: persen(|u| u.baik) },
-        Seri { nama: "Rusak ringan".into(), warna: W_RR, nilai: persen(|u| u.rr) },
-        Seri { nama: "Rusak berat".into(), warna: W_RB, nilai: persen(|u| u.rb) },
-        Seri { nama: "Tidak diisi".into(), warna: W_TAK, nilai: persen(|u| u.tak) },
+        Seri {
+            nama: "Baik".into(),
+            warna: W_BAIK,
+            nilai: persen(|u| u.baik),
+        },
+        Seri {
+            nama: "Rusak ringan".into(),
+            warna: W_RR,
+            nilai: persen(|u| u.rr),
+        },
+        Seri {
+            nama: "Rusak berat".into(),
+            warna: W_RB,
+            nilai: persen(|u| u.rb),
+        },
+        Seri {
+            nama: "Tidak diisi".into(),
+            warna: W_TAK,
+            nilai: persen(|u| u.tak),
+        },
     ];
 
     let rku: Vec<Vec<Sel>> = a

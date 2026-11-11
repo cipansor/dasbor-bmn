@@ -174,7 +174,14 @@ pub fn garis_ramal(
     fmt: &dyn Fn(f64) -> String,
 ) {
     if riwayat.len() < 2 {
-        p.teks(x, y + h / 2.0, 8.5, false, REDUP, "Riwayat belum cukup untuk digambar.");
+        p.teks(
+            x,
+            y + h / 2.0,
+            8.5,
+            false,
+            REDUP,
+            "Riwayat belum cukup untuk digambar.",
+        );
         return;
     }
     let kiri = 46.0;
@@ -216,7 +223,12 @@ pub fn garis_ramal(
     if !ramal.is_empty() {
         let mut pita: Vec<(f64, f64)> = vec![(px(akhir.0 as f64), py(akhir.1))];
         pita.extend(ramal.iter().map(|r| (px(r.tahun as f64), py(r.atas))));
-        pita.extend(ramal.iter().rev().map(|r| (px(r.tahun as f64), py(r.bawah))));
+        pita.extend(
+            ramal
+                .iter()
+                .rev()
+                .map(|r| (px(r.tahun as f64), py(r.bawah))),
+        );
         p.poligon(&pita, "#e3e9fd");
     }
     let nyata: Vec<(f64, f64)> = riwayat.iter().map(|r| (px(r.0 as f64), py(r.1))).collect();
@@ -239,7 +251,17 @@ pub fn garis_ramal(
 
 /// Batang 100% sebaran kondisi.
 #[allow(clippy::too_many_arguments)]
-pub fn bilah_kondisi(p: &mut Page, x: f64, y: f64, w: f64, h: f64, baik: i64, rr: i64, rb: i64, tak: i64) {
+pub fn bilah_kondisi(
+    p: &mut Page,
+    x: f64,
+    y: f64,
+    w: f64,
+    h: f64,
+    baik: i64,
+    rr: i64,
+    rb: i64,
+    tak: i64,
+) {
     let total = (baik + rr + rb + tak).max(1) as f64;
     p.kotak(x, y, w, h, TRACK);
     let mut cx = x;
@@ -267,7 +289,9 @@ mod tests {
     fn grafik_menggambar_tanpa_panik() {
         let mut d = Dokumen::new("Uji Grafik");
         let mut p = Page::new(A4_W, A4_H);
-        kartu_kpi(&mut p, 40.0, 70.0, 120.0, 52.0, "Total", "1.234", "unit", "blue");
+        kartu_kpi(
+            &mut p, 40.0, 70.0, 120.0, 52.0, "Total", "1.234", "unit", "blue",
+        );
         let label: Vec<String> = (2026..2032).map(|y| y.to_string()).collect();
         kolom(
             &mut p,
@@ -277,15 +301,42 @@ mod tests {
             150.0,
             &label,
             &[
-                SeriPdf { nama: "A", warna: C_BAIK, nilai: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0] },
-                SeriPdf { nama: "B", warna: C_RB, nilai: vec![1.0; 6] },
+                SeriPdf {
+                    nama: "A",
+                    warna: C_BAIK,
+                    nilai: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+                },
+                SeriPdf {
+                    nama: "B",
+                    warna: C_RB,
+                    nilai: vec![1.0; 6],
+                },
             ],
             &|v| format!("{v:.0}"),
             Some((4.0, "acuan")),
         );
         // Deret kosong, satu titik, dan nilai nol tidak boleh panik.
-        kolom(&mut p, 40.0, 300.0, 500.0, 100.0, &[], &[], &|v| format!("{v:.0}"), None);
-        garis_ramal(&mut p, 40.0, 420.0, 500.0, 120.0, &[(2020, 1.0)], &[], &|v| format!("{v:.0}"));
+        kolom(
+            &mut p,
+            40.0,
+            300.0,
+            500.0,
+            100.0,
+            &[],
+            &[],
+            &|v| format!("{v:.0}"),
+            None,
+        );
+        garis_ramal(
+            &mut p,
+            40.0,
+            420.0,
+            500.0,
+            120.0,
+            &[(2020, 1.0)],
+            &[],
+            &|v| format!("{v:.0}"),
+        );
         garis_ramal(
             &mut p,
             40.0,
@@ -293,7 +344,12 @@ mod tests {
             500.0,
             120.0,
             &[(2020, 0.0), (2021, 0.0), (2022, 0.0)],
-            &[RamalTitik { tahun: 2023, nilai: 0.0, bawah: 0.0, atas: 0.0 }],
+            &[RamalTitik {
+                tahun: 2023,
+                nilai: 0.0,
+                bawah: 0.0,
+                atas: 0.0,
+            }],
             &|v| format!("{v:.0}"),
         );
         bilah_kondisi(&mut p, 40.0, 700.0, 300.0, 8.0, 0, 0, 0, 0);

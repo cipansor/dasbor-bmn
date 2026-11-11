@@ -32,7 +32,10 @@ pub fn SyncPage() -> impl IntoView {
     let (refresh, set_refresh) = signal(0_u32);
     let (progres, set_progres) = signal(Option::<Progres>::None);
     let (error, set_error) = signal(Option::<String>::None);
-    let statuses = Resource::new(move || refresh.get(), |_| async move { get_sync_statuses().await });
+    let statuses = Resource::new(
+        move || refresh.get(),
+        |_| async move { get_sync_statuses().await },
+    );
     let berjalan = move || progres.with(|p| p.as_ref().is_some_and(|p| p.berjalan));
 
     // Saat halaman dibuka, lanjutkan memantau pekerjaan yang mungkin masih berjalan.

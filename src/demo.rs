@@ -15,59 +15,150 @@ use serde_json::{json, Value};
 
 /// Provinsi beserta kota/kabupaten kedudukan Kejaksaan Negeri contoh.
 const WILAYAH: &[(&str, &[&str])] = &[
-    ("ACEH", &["BANDA ACEH", "LHOKSEUMAWE", "LANGSA", "ACEH BESAR"]),
+    (
+        "ACEH",
+        &["BANDA ACEH", "LHOKSEUMAWE", "LANGSA", "ACEH BESAR"],
+    ),
     (
         "SUMATERA UTARA",
-        &["MEDAN", "BINJAI", "DELI SERDANG", "PEMATANGSIANTAR", "LABUHANBATU", "ASAHAN"],
+        &[
+            "MEDAN",
+            "BINJAI",
+            "DELI SERDANG",
+            "PEMATANGSIANTAR",
+            "LABUHANBATU",
+            "ASAHAN",
+        ],
     ),
-    ("SUMATERA BARAT", &["PADANG", "BUKITTINGGI", "PAYAKUMBUH", "PESISIR SELATAN"]),
+    (
+        "SUMATERA BARAT",
+        &["PADANG", "BUKITTINGGI", "PAYAKUMBUH", "PESISIR SELATAN"],
+    ),
     ("RIAU", &["PEKANBARU", "DUMAI", "KAMPAR", "BENGKALIS"]),
     ("KEPULAUAN RIAU", &["BATAM", "TANJUNGPINANG", "KARIMUN"]),
     ("JAMBI", &["JAMBI", "MUARO JAMBI", "BUNGO"]),
     (
         "SUMATERA SELATAN",
-        &["PALEMBANG", "LUBUKLINGGAU", "PRABUMULIH", "OGAN KOMERING ILIR", "MUARA ENIM"],
+        &[
+            "PALEMBANG",
+            "LUBUKLINGGAU",
+            "PRABUMULIH",
+            "OGAN KOMERING ILIR",
+            "MUARA ENIM",
+        ],
     ),
-    ("KEPULAUAN BANGKA BELITUNG", &["PANGKALPINANG", "BANGKA", "BELITUNG"]),
+    (
+        "KEPULAUAN BANGKA BELITUNG",
+        &["PANGKALPINANG", "BANGKA", "BELITUNG"],
+    ),
     ("BENGKULU", &["BENGKULU", "REJANG LEBONG", "BENGKULU UTARA"]),
-    ("LAMPUNG", &["BANDAR LAMPUNG", "METRO", "LAMPUNG SELATAN", "LAMPUNG TENGAH"]),
+    (
+        "LAMPUNG",
+        &[
+            "BANDAR LAMPUNG",
+            "METRO",
+            "LAMPUNG SELATAN",
+            "LAMPUNG TENGAH",
+        ],
+    ),
     (
         "DKI JAKARTA",
-        &["JAKARTA PUSAT", "JAKARTA SELATAN", "JAKARTA TIMUR", "JAKARTA BARAT", "JAKARTA UTARA"],
+        &[
+            "JAKARTA PUSAT",
+            "JAKARTA SELATAN",
+            "JAKARTA TIMUR",
+            "JAKARTA BARAT",
+            "JAKARTA UTARA",
+        ],
     ),
     (
         "JAWA BARAT",
-        &["BANDUNG", "BOGOR", "BEKASI", "DEPOK", "CIREBON", "TASIKMALAYA", "KARAWANG"],
+        &[
+            "BANDUNG",
+            "BOGOR",
+            "BEKASI",
+            "DEPOK",
+            "CIREBON",
+            "TASIKMALAYA",
+            "KARAWANG",
+        ],
     ),
     ("BANTEN", &["SERANG", "TANGERANG", "CILEGON", "LEBAK"]),
     (
         "JAWA TENGAH",
-        &["SEMARANG", "SURAKARTA", "MAGELANG", "PEKALONGAN", "TEGAL", "BANYUMAS", "KUDUS"],
+        &[
+            "SEMARANG",
+            "SURAKARTA",
+            "MAGELANG",
+            "PEKALONGAN",
+            "TEGAL",
+            "BANYUMAS",
+            "KUDUS",
+        ],
     ),
     ("DI YOGYAKARTA", &["YOGYAKARTA", "SLEMAN", "BANTUL"]),
     (
         "JAWA TIMUR",
-        &["SURABAYA", "MALANG", "KEDIRI", "MADIUN", "JEMBER", "SIDOARJO", "BANYUWANGI"],
+        &[
+            "SURABAYA",
+            "MALANG",
+            "KEDIRI",
+            "MADIUN",
+            "JEMBER",
+            "SIDOARJO",
+            "BANYUWANGI",
+        ],
     ),
     ("BALI", &["DENPASAR", "BADUNG", "GIANYAR", "BULELENG"]),
-    ("NUSA TENGGARA BARAT", &["MATARAM", "LOMBOK TENGAH", "SUMBAWA", "BIMA"]),
-    ("NUSA TENGGARA TIMUR", &["KUPANG", "ENDE", "SIKKA", "MANGGARAI"]),
-    ("KALIMANTAN BARAT", &["PONTIANAK", "SINGKAWANG", "KETAPANG", "SINTANG"]),
-    ("KALIMANTAN TENGAH", &["PALANGKA RAYA", "KOTAWARINGIN TIMUR", "KAPUAS"]),
-    ("KALIMANTAN SELATAN", &["BANJARMASIN", "BANJARBARU", "KOTABARU"]),
-    ("KALIMANTAN TIMUR", &["SAMARINDA", "BALIKPAPAN", "BONTANG", "KUTAI KARTANEGARA"]),
+    (
+        "NUSA TENGGARA BARAT",
+        &["MATARAM", "LOMBOK TENGAH", "SUMBAWA", "BIMA"],
+    ),
+    (
+        "NUSA TENGGARA TIMUR",
+        &["KUPANG", "ENDE", "SIKKA", "MANGGARAI"],
+    ),
+    (
+        "KALIMANTAN BARAT",
+        &["PONTIANAK", "SINGKAWANG", "KETAPANG", "SINTANG"],
+    ),
+    (
+        "KALIMANTAN TENGAH",
+        &["PALANGKA RAYA", "KOTAWARINGIN TIMUR", "KAPUAS"],
+    ),
+    (
+        "KALIMANTAN SELATAN",
+        &["BANJARMASIN", "BANJARBARU", "KOTABARU"],
+    ),
+    (
+        "KALIMANTAN TIMUR",
+        &["SAMARINDA", "BALIKPAPAN", "BONTANG", "KUTAI KARTANEGARA"],
+    ),
     ("KALIMANTAN UTARA", &["TARAKAN", "BULUNGAN", "NUNUKAN"]),
-    ("SULAWESI UTARA", &["MANADO", "BITUNG", "TOMOHON", "KOTAMOBAGU"]),
+    (
+        "SULAWESI UTARA",
+        &["MANADO", "BITUNG", "TOMOHON", "KOTAMOBAGU"],
+    ),
     ("GORONTALO", &["GORONTALO", "LIMBOTO", "BONE BOLANGO"]),
     ("SULAWESI TENGAH", &["PALU", "POSO", "BANGGAI"]),
     ("SULAWESI BARAT", &["MAMUJU", "MAJENE", "POLEWALI MANDAR"]),
     (
         "SULAWESI SELATAN",
-        &["MAKASSAR", "PAREPARE", "PALOPO", "GOWA", "BONE", "BULUKUMBA"],
+        &[
+            "MAKASSAR",
+            "PAREPARE",
+            "PALOPO",
+            "GOWA",
+            "BONE",
+            "BULUKUMBA",
+        ],
     ),
     ("SULAWESI TENGGARA", &["KENDARI", "BAUBAU", "KOLAKA"]),
     ("MALUKU", &["AMBON", "MALUKU TENGAH", "TUAL"]),
-    ("MALUKU UTARA", &["TERNATE", "TIDORE KEPULAUAN", "HALMAHERA SELATAN"]),
+    (
+        "MALUKU UTARA",
+        &["TERNATE", "TIDORE KEPULAUAN", "HALMAHERA SELATAN"],
+    ),
     ("PAPUA", &["JAYAPURA", "BIAK NUMFOR", "KEPULAUAN YAPEN"]),
     ("PAPUA BARAT", &["MANOKWARI", "FAKFAK", "TELUK BINTUNI"]),
     ("PAPUA BARAT DAYA", &["SORONG", "RAJA AMPAT"]),
@@ -112,9 +203,33 @@ fn pola(tabel: &str) -> Pola {
             rusak: None,
             hapus: 0.0,
             jenis: &[
-                Jenis { kelompok: "Tanah Bangunan Kantor Pemerintah", kd: "2010104001", nama: &["Tanah Bangunan Kantor Pemerintah"], merk: TANPA_MERK, harga: (900.0, 42_000.0), masa: 0.0, bobot: 5 },
-                Jenis { kelompok: "Tanah Bangunan Rumah Negara Golongan II", kd: "2010101002", nama: &["Tanah Bangunan Rumah Negara Golongan II"], merk: TANPA_MERK, harga: (250.0, 6_000.0), masa: 0.0, bobot: 4 },
-                Jenis { kelompok: "Tanah Bangunan Gudang", kd: "2010103001", nama: &["Tanah Bangunan Gudang Barang Bukti"], merk: TANPA_MERK, harga: (200.0, 3_500.0), masa: 0.0, bobot: 1 },
+                Jenis {
+                    kelompok: "Tanah Bangunan Kantor Pemerintah",
+                    kd: "2010104001",
+                    nama: &["Tanah Bangunan Kantor Pemerintah"],
+                    merk: TANPA_MERK,
+                    harga: (900.0, 42_000.0),
+                    masa: 0.0,
+                    bobot: 5,
+                },
+                Jenis {
+                    kelompok: "Tanah Bangunan Rumah Negara Golongan II",
+                    kd: "2010101002",
+                    nama: &["Tanah Bangunan Rumah Negara Golongan II"],
+                    merk: TANPA_MERK,
+                    harga: (250.0, 6_000.0),
+                    masa: 0.0,
+                    bobot: 4,
+                },
+                Jenis {
+                    kelompok: "Tanah Bangunan Gudang",
+                    kd: "2010103001",
+                    nama: &["Tanah Bangunan Gudang Barang Bukti"],
+                    merk: TANPA_MERK,
+                    harga: (200.0, 3_500.0),
+                    masa: 0.0,
+                    bobot: 1,
+                },
             ],
         },
         "SIMAN2_M_ASET_GEDUNG_BANGUNAN" => Pola {
@@ -123,9 +238,33 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((62.0, 2.6, 0.09)),
             hapus: 0.12,
             jenis: &[
-                Jenis { kelompok: "Bangunan Gedung Kantor Permanen", kd: "4010101001", nama: &["Bangunan Gedung Kantor Permanen"], merk: TANPA_MERK, harga: (1_800.0, 38_000.0), masa: 50.0, bobot: 4 },
-                Jenis { kelompok: "Bangunan Gudang Tertutup Permanen", kd: "4010104001", nama: &["Gedung Barang Bukti", "Bangunan Gudang Arsip"], merk: TANPA_MERK, harga: (250.0, 2_800.0), masa: 50.0, bobot: 2 },
-                Jenis { kelompok: "Bangunan Gedung Garasi/Pool Permanen", kd: "4010117001", nama: &["Bangunan Garasi Kendaraan Dinas", "Pos Jaga Permanen"], merk: TANPA_MERK, harga: (90.0, 900.0), masa: 50.0, bobot: 3 },
+                Jenis {
+                    kelompok: "Bangunan Gedung Kantor Permanen",
+                    kd: "4010101001",
+                    nama: &["Bangunan Gedung Kantor Permanen"],
+                    merk: TANPA_MERK,
+                    harga: (1_800.0, 38_000.0),
+                    masa: 50.0,
+                    bobot: 4,
+                },
+                Jenis {
+                    kelompok: "Bangunan Gudang Tertutup Permanen",
+                    kd: "4010104001",
+                    nama: &["Gedung Barang Bukti", "Bangunan Gudang Arsip"],
+                    merk: TANPA_MERK,
+                    harga: (250.0, 2_800.0),
+                    masa: 50.0,
+                    bobot: 2,
+                },
+                Jenis {
+                    kelompok: "Bangunan Gedung Garasi/Pool Permanen",
+                    kd: "4010117001",
+                    nama: &["Bangunan Garasi Kendaraan Dinas", "Pos Jaga Permanen"],
+                    merk: TANPA_MERK,
+                    harga: (90.0, 900.0),
+                    masa: 50.0,
+                    bobot: 3,
+                },
             ],
         },
         "SIMAN2_M_ASET_RUMAH" => Pola {
@@ -134,9 +273,33 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((47.0, 2.4, 0.11)),
             hapus: 0.12,
             jenis: &[
-                Jenis { kelompok: "Rumah Negara Golongan II Tipe C Permanen", kd: "4010202007", nama: &["Rumah Negara Golongan II Tipe C"], merk: TANPA_MERK, harga: (220.0, 1_100.0), masa: 50.0, bobot: 3 },
-                Jenis { kelompok: "Rumah Negara Golongan II Tipe D Permanen", kd: "4010202010", nama: &["Rumah Negara Golongan II Tipe D"], merk: TANPA_MERK, harga: (160.0, 750.0), masa: 50.0, bobot: 4 },
-                Jenis { kelompok: "Mess/Wisma/Asrama Permanen", kd: "4010203001", nama: &["Mess Pegawai", "Asrama Jaksa"], merk: TANPA_MERK, harga: (400.0, 3_200.0), masa: 50.0, bobot: 1 },
+                Jenis {
+                    kelompok: "Rumah Negara Golongan II Tipe C Permanen",
+                    kd: "4010202007",
+                    nama: &["Rumah Negara Golongan II Tipe C"],
+                    merk: TANPA_MERK,
+                    harga: (220.0, 1_100.0),
+                    masa: 50.0,
+                    bobot: 3,
+                },
+                Jenis {
+                    kelompok: "Rumah Negara Golongan II Tipe D Permanen",
+                    kd: "4010202010",
+                    nama: &["Rumah Negara Golongan II Tipe D"],
+                    merk: TANPA_MERK,
+                    harga: (160.0, 750.0),
+                    masa: 50.0,
+                    bobot: 4,
+                },
+                Jenis {
+                    kelompok: "Mess/Wisma/Asrama Permanen",
+                    kd: "4010203001",
+                    nama: &["Mess Pegawai", "Asrama Jaksa"],
+                    merk: TANPA_MERK,
+                    harga: (400.0, 3_200.0),
+                    masa: 50.0,
+                    bobot: 1,
+                },
             ],
         },
         "SIMAN2_M_ASET_ANGKUTAN_BERMOTOR" => Pola {
@@ -145,10 +308,48 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((14.5, 2.6, 0.26)),
             hapus: 0.55,
             jenis: &[
-                Jenis { kelompok: "Mini Bus (Penumpang 14 Orang Kebawah)", kd: "3020102003", nama: &["Mini Bus Operasional", "Kendaraan Dinas Operasional"], merk: &["Toyota Innova", "Toyota Avanza", "Mitsubishi Xpander", "Suzuki Ertiga", "Daihatsu Terios"], harga: (190.0, 520.0), masa: 7.0, bobot: 4 },
-                Jenis { kelompok: "Kendaraan Tahanan", kd: "3020105011", nama: &["Mobil Tahanan"], merk: &["Isuzu Elf", "Mitsubishi Colt Diesel", "Toyota Hiace"], harga: (380.0, 760.0), masa: 7.0, bobot: 2 },
-                Jenis { kelompok: "Sedan", kd: "3020101001", nama: &["Kendaraan Dinas Jabatan"], merk: &["Toyota Camry", "Toyota Altis", "Honda Civic"], harga: (420.0, 890.0), masa: 7.0, bobot: 1 },
-                Jenis { kelompok: "Sepeda Motor", kd: "3020104001", nama: &["Sepeda Motor Operasional"], merk: &["Honda Vario", "Honda Supra X", "Yamaha NMAX", "Honda Beat"], harga: (16.0, 38.0), masa: 7.0, bobot: 6 },
+                Jenis {
+                    kelompok: "Mini Bus (Penumpang 14 Orang Kebawah)",
+                    kd: "3020102003",
+                    nama: &["Mini Bus Operasional", "Kendaraan Dinas Operasional"],
+                    merk: &[
+                        "Toyota Innova",
+                        "Toyota Avanza",
+                        "Mitsubishi Xpander",
+                        "Suzuki Ertiga",
+                        "Daihatsu Terios",
+                    ],
+                    harga: (190.0, 520.0),
+                    masa: 7.0,
+                    bobot: 4,
+                },
+                Jenis {
+                    kelompok: "Kendaraan Tahanan",
+                    kd: "3020105011",
+                    nama: &["Mobil Tahanan"],
+                    merk: &["Isuzu Elf", "Mitsubishi Colt Diesel", "Toyota Hiace"],
+                    harga: (380.0, 760.0),
+                    masa: 7.0,
+                    bobot: 2,
+                },
+                Jenis {
+                    kelompok: "Sedan",
+                    kd: "3020101001",
+                    nama: &["Kendaraan Dinas Jabatan"],
+                    merk: &["Toyota Camry", "Toyota Altis", "Honda Civic"],
+                    harga: (420.0, 890.0),
+                    masa: 7.0,
+                    bobot: 1,
+                },
+                Jenis {
+                    kelompok: "Sepeda Motor",
+                    kd: "3020104001",
+                    nama: &["Sepeda Motor Operasional"],
+                    merk: &["Honda Vario", "Honda Supra X", "Yamaha NMAX", "Honda Beat"],
+                    harga: (16.0, 38.0),
+                    masa: 7.0,
+                    bobot: 6,
+                },
             ],
         },
         "SIMAN2_M_ASET_ALAT_BESAR" => Pola {
@@ -157,8 +358,24 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((16.0, 2.4, 0.22)),
             hapus: 0.35,
             jenis: &[
-                Jenis { kelompok: "Electric Generating Set", kd: "3010303001", nama: &["Genset 100 KVA", "Genset 250 KVA"], merk: &["Perkins", "Cummins", "Caterpillar"], harga: (180.0, 950.0), masa: 10.0, bobot: 4 },
-                Jenis { kelompok: "Pompa", kd: "3010304001", nama: &["Pompa Pemadam Kebakaran"], merk: &["Ebara", "Grundfos"], harga: (60.0, 240.0), masa: 10.0, bobot: 1 },
+                Jenis {
+                    kelompok: "Electric Generating Set",
+                    kd: "3010303001",
+                    nama: &["Genset 100 KVA", "Genset 250 KVA"],
+                    merk: &["Perkins", "Cummins", "Caterpillar"],
+                    harga: (180.0, 950.0),
+                    masa: 10.0,
+                    bobot: 4,
+                },
+                Jenis {
+                    kelompok: "Pompa",
+                    kd: "3010304001",
+                    nama: &["Pompa Pemadam Kebakaran"],
+                    merk: &["Ebara", "Grundfos"],
+                    harga: (60.0, 240.0),
+                    masa: 10.0,
+                    bobot: 1,
+                },
             ],
         },
         "SIMAN2_M_ASET_ALAT_PERSENJATAAN" => Pola {
@@ -167,8 +384,24 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((30.0, 2.2, 0.14)),
             hapus: 0.25,
             jenis: &[
-                Jenis { kelompok: "Senjata Genggam", kd: "3090101001", nama: &["Pistol Dinas"], merk: &["Pindad G2", "Pindad P3A"], harga: (12.0, 32.0), masa: 10.0, bobot: 3 },
-                Jenis { kelompok: "Alat Keamanan dan Perlindungan", kd: "3090402001", nama: &["Borgol", "Rompi Pengaman", "Metal Detector"], merk: &["Pindad", "Garrett", "-"], harga: (0.6, 9.0), masa: 5.0, bobot: 4 },
+                Jenis {
+                    kelompok: "Senjata Genggam",
+                    kd: "3090101001",
+                    nama: &["Pistol Dinas"],
+                    merk: &["Pindad G2", "Pindad P3A"],
+                    harga: (12.0, 32.0),
+                    masa: 10.0,
+                    bobot: 3,
+                },
+                Jenis {
+                    kelompok: "Alat Keamanan dan Perlindungan",
+                    kd: "3090402001",
+                    nama: &["Borgol", "Rompi Pengaman", "Metal Detector"],
+                    merk: &["Pindad", "Garrett", "-"],
+                    harga: (0.6, 9.0),
+                    masa: 5.0,
+                    bobot: 4,
+                },
             ],
         },
         "SIMAN2_M_ASET_JALAN_DAN_JEMBATAN" => Pola {
@@ -176,18 +409,30 @@ fn pola(tabel: &str) -> Pola {
             umur_maks: 30,
             rusak: Some((18.0, 2.2, 0.18)),
             hapus: 0.20,
-            jenis: &[
-                Jenis { kelompok: "Jalan Khusus Kompleks", kd: "5010107001", nama: &["Jalan Lingkungan Kantor", "Pelataran Parkir"], merk: TANPA_MERK, harga: (80.0, 900.0), masa: 10.0, bobot: 1 },
-            ],
+            jenis: &[Jenis {
+                kelompok: "Jalan Khusus Kompleks",
+                kd: "5010107001",
+                nama: &["Jalan Lingkungan Kantor", "Pelataran Parkir"],
+                merk: TANPA_MERK,
+                harga: (80.0, 900.0),
+                masa: 10.0,
+                bobot: 1,
+            }],
         },
         "SIMAN2_M_ASET_BANGUNAN_AIR" => Pola {
             per_satker: 0.3,
             umur_maks: 35,
             rusak: Some((32.0, 2.2, 0.11)),
             hapus: 0.15,
-            jenis: &[
-                Jenis { kelompok: "Bangunan Pembuang Pengaman Sungai", kd: "5020403001", nama: &["Saluran Drainase Kompleks", "Talud Pengaman"], merk: TANPA_MERK, harga: (60.0, 650.0), masa: 30.0, bobot: 1 },
-            ],
+            jenis: &[Jenis {
+                kelompok: "Bangunan Pembuang Pengaman Sungai",
+                kd: "5020403001",
+                nama: &["Saluran Drainase Kompleks", "Talud Pengaman"],
+                merk: TANPA_MERK,
+                harga: (60.0, 650.0),
+                masa: 30.0,
+                bobot: 1,
+            }],
         },
         "SIMAN2_M_ASET_INSTALASI_JARINGAN" => Pola {
             per_satker: 3.0,
@@ -195,9 +440,33 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((24.0, 2.2, 0.16)),
             hapus: 0.28,
             jenis: &[
-                Jenis { kelompok: "Instalasi Gardu Listrik Distribusi", kd: "5030601001", nama: &["Instalasi Listrik Gedung Kantor"], merk: TANPA_MERK, harga: (45.0, 520.0), masa: 20.0, bobot: 3 },
-                Jenis { kelompok: "Jaringan Telepon Diatas Tanah", kd: "5040301001", nama: &["Jaringan LAN Kantor", "Jaringan Telepon/PABX"], merk: TANPA_MERK, harga: (25.0, 380.0), masa: 20.0, bobot: 3 },
-                Jenis { kelompok: "Instalasi Air Bersih/Air Baku", kd: "5030101001", nama: &["Instalasi Air Bersih"], merk: TANPA_MERK, harga: (20.0, 190.0), masa: 20.0, bobot: 2 },
+                Jenis {
+                    kelompok: "Instalasi Gardu Listrik Distribusi",
+                    kd: "5030601001",
+                    nama: &["Instalasi Listrik Gedung Kantor"],
+                    merk: TANPA_MERK,
+                    harga: (45.0, 520.0),
+                    masa: 20.0,
+                    bobot: 3,
+                },
+                Jenis {
+                    kelompok: "Jaringan Telepon Diatas Tanah",
+                    kd: "5040301001",
+                    nama: &["Jaringan LAN Kantor", "Jaringan Telepon/PABX"],
+                    merk: TANPA_MERK,
+                    harga: (25.0, 380.0),
+                    masa: 20.0,
+                    bobot: 3,
+                },
+                Jenis {
+                    kelompok: "Instalasi Air Bersih/Air Baku",
+                    kd: "5030101001",
+                    nama: &["Instalasi Air Bersih"],
+                    merk: TANPA_MERK,
+                    harga: (20.0, 190.0),
+                    masa: 20.0,
+                    bobot: 2,
+                },
             ],
         },
         "SIMAN2_M_ASET_KHUSUS_TIK" => Pola {
@@ -206,11 +475,61 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((8.6, 2.4, 0.36)),
             hapus: 0.70,
             jenis: &[
-                Jenis { kelompok: "P.C Unit", kd: "3100102001", nama: &["PC Unit"], merk: &["Lenovo ThinkCentre", "HP ProDesk", "Dell OptiPlex", "Acer Veriton"], harga: (9.0, 19.0), masa: 4.0, bobot: 8 },
-                Jenis { kelompok: "Lap Top", kd: "3100102002", nama: &["Laptop"], merk: &["Lenovo ThinkPad", "HP ProBook", "Dell Latitude", "Asus ExpertBook"], harga: (11.0, 26.0), masa: 4.0, bobot: 6 },
-                Jenis { kelompok: "Printer (Peralatan Personal Komputer)", kd: "3100203003", nama: &["Printer"], merk: &["Epson L-Series", "HP LaserJet", "Canon Pixma"], harga: (2.5, 9.0), masa: 4.0, bobot: 5 },
-                Jenis { kelompok: "Scanner (Peralatan Personal Komputer)", kd: "3100203004", nama: &["Scanner Dokumen"], merk: &["Fujitsu ScanSnap", "Epson DS", "Canon DR"], harga: (4.0, 22.0), masa: 4.0, bobot: 2 },
-                Jenis { kelompok: "Server", kd: "3100204001", nama: &["Server Rak"], merk: &["Dell PowerEdge", "HPE ProLiant", "Lenovo ThinkSystem"], harga: (70.0, 380.0), masa: 4.0, bobot: 1 },
+                Jenis {
+                    kelompok: "P.C Unit",
+                    kd: "3100102001",
+                    nama: &["PC Unit"],
+                    merk: &[
+                        "Lenovo ThinkCentre",
+                        "HP ProDesk",
+                        "Dell OptiPlex",
+                        "Acer Veriton",
+                    ],
+                    harga: (9.0, 19.0),
+                    masa: 4.0,
+                    bobot: 8,
+                },
+                Jenis {
+                    kelompok: "Lap Top",
+                    kd: "3100102002",
+                    nama: &["Laptop"],
+                    merk: &[
+                        "Lenovo ThinkPad",
+                        "HP ProBook",
+                        "Dell Latitude",
+                        "Asus ExpertBook",
+                    ],
+                    harga: (11.0, 26.0),
+                    masa: 4.0,
+                    bobot: 6,
+                },
+                Jenis {
+                    kelompok: "Printer (Peralatan Personal Komputer)",
+                    kd: "3100203003",
+                    nama: &["Printer"],
+                    merk: &["Epson L-Series", "HP LaserJet", "Canon Pixma"],
+                    harga: (2.5, 9.0),
+                    masa: 4.0,
+                    bobot: 5,
+                },
+                Jenis {
+                    kelompok: "Scanner (Peralatan Personal Komputer)",
+                    kd: "3100203004",
+                    nama: &["Scanner Dokumen"],
+                    merk: &["Fujitsu ScanSnap", "Epson DS", "Canon DR"],
+                    harga: (4.0, 22.0),
+                    masa: 4.0,
+                    bobot: 2,
+                },
+                Jenis {
+                    kelompok: "Server",
+                    kd: "3100204001",
+                    nama: &["Server Rak"],
+                    merk: &["Dell PowerEdge", "HPE ProLiant", "Lenovo ThinkSystem"],
+                    harga: (70.0, 380.0),
+                    masa: 4.0,
+                    bobot: 1,
+                },
             ],
         },
         "SIMAN2_M_ASET_NON_TIK" => Pola {
@@ -219,13 +538,69 @@ fn pola(tabel: &str) -> Pola {
             rusak: Some((14.0, 2.0, 0.22)),
             hapus: 0.55,
             jenis: &[
-                Jenis { kelompok: "Meja Kerja Kayu", kd: "3050201002", nama: &["Meja Kerja Pejabat", "Meja Kerja Staf"], merk: &["Olympic", "Ligna", "Lokal"], harga: (1.4, 6.5), masa: 5.0, bobot: 8 },
-                Jenis { kelompok: "Kursi Besi/Metal", kd: "3050201003", nama: &["Kursi Kerja", "Kursi Tamu", "Kursi Rapat"], merk: &["Chitose", "Indachi", "Brother"], harga: (0.7, 4.5), masa: 5.0, bobot: 10 },
-                Jenis { kelompok: "Lemari Besi/Metal", kd: "3050104001", nama: &["Lemari Arsip", "Filing Cabinet", "Brankas"], merk: &["Lion", "Brother", "Daiko"], harga: (2.0, 14.0), masa: 5.0, bobot: 5 },
-                Jenis { kelompok: "A.C. Split", kd: "3050204004", nama: &["AC Split 1 PK", "AC Split 2 PK"], merk: &["Daikin", "Panasonic", "Sharp", "LG"], harga: (4.5, 13.0), masa: 5.0, bobot: 6 },
-                Jenis { kelompok: "Televisi", kd: "3050206002", nama: &["Televisi LED"], merk: &["Samsung", "LG", "Sharp"], harga: (3.0, 16.0), masa: 5.0, bobot: 2 },
-                Jenis { kelompok: "Camera Video", kd: "3060102128", nama: &["CCTV Set", "Kamera Sidang"], merk: &["Hikvision", "Dahua", "Sony"], harga: (6.0, 85.0), masa: 5.0, bobot: 2 },
-                Jenis { kelompok: "Sound System", kd: "3050206046", nama: &["Sound System Ruang Rapat"], merk: &["TOA", "Yamaha", "BMB"], harga: (5.0, 60.0), masa: 5.0, bobot: 1 },
+                Jenis {
+                    kelompok: "Meja Kerja Kayu",
+                    kd: "3050201002",
+                    nama: &["Meja Kerja Pejabat", "Meja Kerja Staf"],
+                    merk: &["Olympic", "Ligna", "Lokal"],
+                    harga: (1.4, 6.5),
+                    masa: 5.0,
+                    bobot: 8,
+                },
+                Jenis {
+                    kelompok: "Kursi Besi/Metal",
+                    kd: "3050201003",
+                    nama: &["Kursi Kerja", "Kursi Tamu", "Kursi Rapat"],
+                    merk: &["Chitose", "Indachi", "Brother"],
+                    harga: (0.7, 4.5),
+                    masa: 5.0,
+                    bobot: 10,
+                },
+                Jenis {
+                    kelompok: "Lemari Besi/Metal",
+                    kd: "3050104001",
+                    nama: &["Lemari Arsip", "Filing Cabinet", "Brankas"],
+                    merk: &["Lion", "Brother", "Daiko"],
+                    harga: (2.0, 14.0),
+                    masa: 5.0,
+                    bobot: 5,
+                },
+                Jenis {
+                    kelompok: "A.C. Split",
+                    kd: "3050204004",
+                    nama: &["AC Split 1 PK", "AC Split 2 PK"],
+                    merk: &["Daikin", "Panasonic", "Sharp", "LG"],
+                    harga: (4.5, 13.0),
+                    masa: 5.0,
+                    bobot: 6,
+                },
+                Jenis {
+                    kelompok: "Televisi",
+                    kd: "3050206002",
+                    nama: &["Televisi LED"],
+                    merk: &["Samsung", "LG", "Sharp"],
+                    harga: (3.0, 16.0),
+                    masa: 5.0,
+                    bobot: 2,
+                },
+                Jenis {
+                    kelompok: "Camera Video",
+                    kd: "3060102128",
+                    nama: &["CCTV Set", "Kamera Sidang"],
+                    merk: &["Hikvision", "Dahua", "Sony"],
+                    harga: (6.0, 85.0),
+                    masa: 5.0,
+                    bobot: 2,
+                },
+                Jenis {
+                    kelompok: "Sound System",
+                    kd: "3050206046",
+                    nama: &["Sound System Ruang Rapat"],
+                    merk: &["TOA", "Yamaha", "BMB"],
+                    harga: (5.0, 60.0),
+                    masa: 5.0,
+                    bobot: 1,
+                },
             ],
         },
         "SIMAN2_M_ASET_ASET_TAK_BERWUJUD" => Pola {
@@ -233,9 +608,19 @@ fn pola(tabel: &str) -> Pola {
             umur_maks: 14,
             rusak: None,
             hapus: 0.0,
-            jenis: &[
-                Jenis { kelompok: "Software Komputer", kd: "8010101001", nama: &["Aplikasi Manajemen Perkara", "Aplikasi Persuratan", "Lisensi Perangkat Lunak"], merk: TANPA_MERK, harga: (15.0, 900.0), masa: 4.0, bobot: 1 },
-            ],
+            jenis: &[Jenis {
+                kelompok: "Software Komputer",
+                kd: "8010101001",
+                nama: &[
+                    "Aplikasi Manajemen Perkara",
+                    "Aplikasi Persuratan",
+                    "Lisensi Perangkat Lunak",
+                ],
+                merk: TANPA_MERK,
+                harga: (15.0, 900.0),
+                masa: 4.0,
+                bobot: 1,
+            }],
         },
         "SIMAN2_M_ASET_ASET_TETAP_LAINNYA" => Pola {
             per_satker: 3.0,
@@ -243,8 +628,24 @@ fn pola(tabel: &str) -> Pola {
             rusak: None,
             hapus: 0.0,
             jenis: &[
-                Jenis { kelompok: "Monografi", kd: "6010101001", nama: &["Buku Perpustakaan Hukum"], merk: TANPA_MERK, harga: (0.1, 3.0), masa: 0.0, bobot: 5 },
-                Jenis { kelompok: "Lukisan Cat Minyak", kd: "6020201001", nama: &["Lukisan", "Barang Bercorak Kesenian"], merk: TANPA_MERK, harga: (1.0, 40.0), masa: 0.0, bobot: 1 },
+                Jenis {
+                    kelompok: "Monografi",
+                    kd: "6010101001",
+                    nama: &["Buku Perpustakaan Hukum"],
+                    merk: TANPA_MERK,
+                    harga: (0.1, 3.0),
+                    masa: 0.0,
+                    bobot: 5,
+                },
+                Jenis {
+                    kelompok: "Lukisan Cat Minyak",
+                    kd: "6020201001",
+                    nama: &["Lukisan", "Barang Bercorak Kesenian"],
+                    merk: TANPA_MERK,
+                    harga: (1.0, 40.0),
+                    masa: 0.0,
+                    bobot: 1,
+                },
             ],
         },
         "SIMAN2_M_ASET_ASET_TETAP_RENOVASI" => Pola {
@@ -252,18 +653,33 @@ fn pola(tabel: &str) -> Pola {
             umur_maks: 15,
             rusak: None,
             hapus: 0.0,
-            jenis: &[
-                Jenis { kelompok: "Gedung dan Bangunan Dalam Renovasi", kd: "6070201001", nama: &["Renovasi Gedung Kantor Pinjam Pakai"], merk: TANPA_MERK, harga: (80.0, 1_800.0), masa: 10.0, bobot: 1 },
-            ],
+            jenis: &[Jenis {
+                kelompok: "Gedung dan Bangunan Dalam Renovasi",
+                kd: "6070201001",
+                nama: &["Renovasi Gedung Kantor Pinjam Pakai"],
+                merk: TANPA_MERK,
+                harga: (80.0, 1_800.0),
+                masa: 10.0,
+                bobot: 1,
+            }],
         },
         _ => Pola {
             per_satker: 0.28,
             umur_maks: 7,
             rusak: None,
             hapus: 0.0,
-            jenis: &[
-                Jenis { kelompok: "Gedung dan Bangunan Dalam Pengerjaan", kd: "7010301001", nama: &["KDP Pembangunan Gedung Kantor", "KDP Rehabilitasi Rumah Negara"], merk: TANPA_MERK, harga: (300.0, 14_000.0), masa: 0.0, bobot: 1 },
-            ],
+            jenis: &[Jenis {
+                kelompok: "Gedung dan Bangunan Dalam Pengerjaan",
+                kd: "7010301001",
+                nama: &[
+                    "KDP Pembangunan Gedung Kantor",
+                    "KDP Rehabilitasi Rumah Negara",
+                ],
+                merk: TANPA_MERK,
+                harga: (300.0, 14_000.0),
+                masa: 0.0,
+                bobot: 1,
+            }],
         },
     }
 }
@@ -272,7 +688,7 @@ fn pola(tabel: &str) -> Pola {
 pub struct Rng(pub u64);
 
 impl Rng {
-    pub fn next(&mut self) -> u64 {
+    pub fn berikut(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
         let mut z = self.0;
         z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
@@ -281,13 +697,13 @@ impl Rng {
     }
     /// Pecahan seragam pada (0, 1).
     pub fn f(&mut self) -> f64 {
-        ((self.next() >> 11) as f64 + 0.5) / (1u64 << 53) as f64
+        ((self.berikut() >> 11) as f64 + 0.5) / (1u64 << 53) as f64
     }
     pub fn rentang(&mut self, lo: f64, hi: f64) -> f64 {
         lo + self.f() * (hi - lo)
     }
     pub fn pilih<'a, T>(&mut self, xs: &'a [T]) -> &'a T {
-        &xs[(self.next() % xs.len() as u64) as usize]
+        &xs[(self.berikut() % xs.len() as u64) as usize]
     }
     /// Hampiran normal baku (jumlah empat seragam).
     pub fn normal(&mut self) -> f64 {
@@ -431,11 +847,11 @@ pub fn baris_tabel(tabel: &str, tahun_kini: i32, bulan_kini: u32) -> Vec<Value> 
             let j = &p.jenis[pilih_berbobot(&mut rng, &bobot_jenis)];
             let th = tahun[pilih_berbobot(&mut rng, &bobot)];
             let bln = if th == tahun_kini {
-                1 + (rng.next() % bulan_kini.max(1) as u64) as u32
+                1 + (rng.berikut() % bulan_kini.max(1) as u64) as u32
             } else {
-                1 + (rng.next() % 12) as u32
+                1 + (rng.berikut() % 12) as u32
             };
-            let hari = 1 + (rng.next() % 28) as u32;
+            let hari = 1 + (rng.berikut() % 28) as u32;
             let umur = (kini - (th as f64 + (bln as f64 - 0.5) / 12.0)).max(0.0);
 
             // Kondisi: proses dua tahap bergantung umur dan mutu pemeliharaan satker.
@@ -459,8 +875,7 @@ pub fn baris_tabel(tabel: &str, tahun_kini: i32, bulan_kini: u32) -> Vec<Value> 
             }
             urut += 1;
 
-            let harga = (j.harga.0 * (j.harga.1 / j.harga.0).powf(rng.f()) * 1_000_000.0
-                / 1000.0)
+            let harga = (j.harga.0 * (j.harga.1 / j.harga.0).powf(rng.f()) * 1_000_000.0 / 1000.0)
                 .round()
                 * 1000.0;
             // Sebagian kecil tercatat Rp1 (belum dinilai) sebagai anomali data.
@@ -492,7 +907,11 @@ pub fn baris_tabel(tabel: &str, tahun_kini: i32, bulan_kini: u32) -> Vec<Value> 
             let sertifikat = tanah && rng.f() < s.p_sertifikat;
             let sengketa = tanah && rng.f() < 0.02;
             // Sedikit isian kosong agar pemeriksaan mutu data punya bahan.
-            let kondisi_isi = if def.fisik && rng.f() < 0.012 { "" } else { kondisi };
+            let kondisi_isi = if def.fisik && rng.f() < 0.012 {
+                ""
+            } else {
+                kondisi
+            };
             let tgl = if rng.f() < 0.004 {
                 "1900-01-01 00:00:00".to_string()
             } else {
@@ -517,9 +936,9 @@ pub fn baris_tabel(tabel: &str, tahun_kini: i32, bulan_kini: u32) -> Vec<Value> 
                 "rph_perolehan": nilai,
                 "rph_buku": buku,
                 "status_bmn_yn": "Y",
-                "jml_photo": if rng.f() < 0.7 { 1 + (rng.next() % 3) as i64 } else { 0 },
+                "jml_photo": if rng.f() < 0.7 { 1 + (rng.berikut() % 3) as i64 } else { 0 },
                 "ur_sskel": j.kelompok,
-                "alamat": format!("Jl. Contoh No. {} {}", 1 + rng.next() % 180, s.kota),
+                "alamat": format!("Jl. Contoh No. {} {}", 1 + rng.berikut() % 180, s.kota),
                 "ur_kab": s.kota,
                 "ur_prov": s.prov,
                 "asl_perlh": *rng.pilih(&["Pembelian", "Pembelian", "Pembelian", "Transfer Masuk", "Hibah Masuk"]),
@@ -528,10 +947,10 @@ pub fn baris_tabel(tabel: &str, tahun_kini: i32, bulan_kini: u32) -> Vec<Value> 
                 "tgl_buku_pertama": format!("{th}-{bln:02}-{hari:02} 00:00:00"),
                 "ur_sumber_dana": *rng.pilih(&["APBN", "APBN", "APBN", "APBN", "PNBP", "Hibah"]),
                 "status_bmn_idle": if idle { "Y" } else { "N" },
-                "no_psp": if psp { format!("KEP-{}/KN/{}", 100 + rng.next() % 900, (th + 1).min(tahun_kini)) } else { String::new() },
+                "no_psp": if psp { format!("KEP-{}/KN/{}", 100 + rng.berikut() % 900, (th + 1).min(tahun_kini)) } else { String::new() },
                 "luas": if bangunan { (60.0 + 2400.0 * rng.f() * rng.f()).round() } else { 0.0 },
-                "no_perkara_hukum": if sengketa { format!("{}/Pdt.G/{}/PN", 10 + rng.next() % 300, tahun_kini - 1 - (rng.next() % 4) as i32) } else { String::new() },
-                "no_dok_bukti_kepemilikan": if sertifikat { format!("SHP No. {}", 100 + rng.next() % 9000) } else { String::new() },
+                "no_perkara_hukum": if sengketa { format!("{}/Pdt.G/{}/PN", 10 + rng.berikut() % 300, tahun_kini - 1 - (rng.berikut() % 4) as i32) } else { String::new() },
+                "no_dok_bukti_kepemilikan": if sertifikat { format!("SHP No. {}", 100 + rng.berikut() % 9000) } else { String::new() },
                 "jns_sertifikat": if sertifikat { "Hak Pakai" } else { "" },
                 "dihentikan_yn": if dihentikan { "Y" } else { "N" },
                 "gps_latitude": if punya_gps { (lat * 1e5).round() / 1e5 } else { 0.0 },
@@ -544,7 +963,7 @@ pub fn baris_tabel(tabel: &str, tahun_kini: i32, bulan_kini: u32) -> Vec<Value> 
                 "nama_satker": s.nama,
                 "ur_kondisi": kondisi_isi,
                 "nm_penghuni": if tabel == "SIMAN2_M_ASET_RUMAH" && rng.f() < 0.82 { "Pegawai (contoh)" } else { "" },
-                "no_polisi": if tabel == "SIMAN2_M_ASET_ANGKUTAN_BERMOTOR" { format!("B {} XX", 1000 + rng.next() % 8999) } else { String::new() },
+                "no_polisi": if tabel == "SIMAN2_M_ASET_ANGKUTAN_BERMOTOR" { format!("B {} XX", 1000 + rng.berikut() % 8999) } else { String::new() },
                 "ur_kanwil": format!("KANWIL DJKN {}", s.prov),
                 "ur_kl": "KEJAKSAAN REPUBLIK INDONESIA",
                 "ur_eselon1": "KEJAKSAAN REPUBLIK INDONESIA",
@@ -638,7 +1057,10 @@ mod tests {
             baik / n
         };
         assert!(hitung(true) > 0.85, "aset muda umumnya baik");
-        assert!(hitung(false) < hitung(true) - 0.2, "aset tua lebih banyak rusak");
+        assert!(
+            hitung(false) < hitung(true) - 0.2,
+            "aset tua lebih banyak rusak"
+        );
     }
 
     #[test]

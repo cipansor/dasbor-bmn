@@ -233,13 +233,41 @@ fn Rinci(s: SatkerRinci) -> impl IntoView {
                 Sel::unit(k.unit),
                 Sel::rupiah(k.nilai),
                 Sel::persen_bila(k.pct_baik(), c.fisik && k.kondisi_diketahui() > 0),
-                Sel::Angka(if c.fisik { format_number(k.rr) } else { "–".into() }),
-                Sel::Angka(if c.fisik { format_number(k.rb) } else { "–".into() }),
-                Sel::Angka(if c.disusutkan { format_number(k.habis) } else { "–".into() }),
-                Sel::Angka(if c.disusutkan { format_unit(k.habis_5()) } else { "–".into() }),
-                Sel::Angka(if c.fisik { format_unit(k.rb_5()) } else { "–".into() }),
-                Sel::Angka(if c.kebutuhan != "-" { format_unit(k.ganti_total(1)) } else { "–".into() }),
-                Sel::Angka(if c.kebutuhan != "-" { format_rupiah_short(k.biaya_total(1)) } else { "–".into() }),
+                Sel::Angka(if c.fisik {
+                    format_number(k.rr)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.fisik {
+                    format_number(k.rb)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.disusutkan {
+                    format_number(k.habis)
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.disusutkan {
+                    format_unit(k.habis_5())
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.fisik {
+                    format_unit(k.rb_5())
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.kebutuhan != "-" {
+                    format_unit(k.ganti_total(1))
+                } else {
+                    "–".into()
+                }),
+                Sel::Angka(if c.kebutuhan != "-" {
+                    format_rupiah_short(k.biaya_total(1))
+                } else {
+                    "–".into()
+                }),
             ]
         })
         .collect();
@@ -251,7 +279,10 @@ fn Rinci(s: SatkerRinci) -> impl IntoView {
     let label_rb = label_th.clone();
     let skenario: Vec<Vec<Sel>> = (0..3)
         .map(|i| {
-            let mut sel = vec![Sel::Teks(SKENARIO[i].0.to_string()), Sel::unit_f(r.ganti_kini[i])];
+            let mut sel = vec![
+                Sel::Teks(SKENARIO[i].0.to_string()),
+                Sel::unit_f(r.ganti_kini[i]),
+            ];
             sel.extend(r.ganti_th[i].iter().map(|v| Sel::unit_f(*v)));
             sel.push(Sel::unit_f(r.ganti_total(i)));
             sel.push(Sel::rupiah(r.biaya_total(i)));

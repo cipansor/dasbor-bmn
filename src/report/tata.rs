@@ -83,7 +83,8 @@ impl Penulis {
             self.y += 10.0;
         }
         self.hal.kotak(MARGIN, self.y, 3.5, 15.0, UTAMA);
-        self.hal.teks(MARGIN + 10.0, self.y + 11.5, 12.5, true, TINTA, teks);
+        self.hal
+            .teks(MARGIN + 10.0, self.y + 11.5, 12.5, true, TINTA, teks);
         if let Some(s) = sub {
             let lw = lebar_teks(teks, 12.5, true);
             let ruang = LEBAR - 22.0 - lw;
@@ -96,8 +97,14 @@ impl Penulis {
                 &Page::potong(s, ruang, 8.0, false),
             );
         }
-        self.hal
-            .garis(MARGIN, self.y + 20.0, MARGIN + LEBAR, self.y + 20.0, GARIS, 0.8);
+        self.hal.garis(
+            MARGIN,
+            self.y + 20.0,
+            MARGIN + LEBAR,
+            self.y + 20.0,
+            GARIS,
+            0.8,
+        );
         self.y += 30.0;
     }
 
@@ -109,11 +116,20 @@ impl Penulis {
         self.y += 16.0;
     }
 
-    fn teks_bungkus(&mut self, x: f64, lebar: f64, ukuran: f64, tebal: bool, warna: &str, isi: &str) {
+    fn teks_bungkus(
+        &mut self,
+        x: f64,
+        lebar: f64,
+        ukuran: f64,
+        tebal: bool,
+        warna: &str,
+        isi: &str,
+    ) {
         let tinggi = ukuran * 1.42;
         for baris in bungkus(isi, lebar, ukuran, tebal) {
             self.pastikan(tinggi);
-            self.hal.teks(x, self.y + ukuran, ukuran, tebal, warna, &baris);
+            self.hal
+                .teks(x, self.y + ukuran, ukuran, tebal, warna, &baris);
             self.y += tinggi;
         }
     }
@@ -148,7 +164,8 @@ impl Penulis {
                 self.hal.kotak(MARGIN, self.y + 2.5, 5.0, 5.0, warna);
                 // Awalan tebal ditimpa di atas baris pertama agar menonjol.
                 let sisa = b.strip_prefix(awalan).unwrap_or(b);
-                self.hal.teks(MARGIN + 12.0, self.y + ukuran, ukuran, true, TINTA, awalan);
+                self.hal
+                    .teks(MARGIN + 12.0, self.y + ukuran, ukuran, true, TINTA, awalan);
                 self.hal.teks(
                     MARGIN + 12.0 + lebar_teks(awalan, ukuran, true),
                     self.y + ukuran,
@@ -158,7 +175,8 @@ impl Penulis {
                     sisa,
                 );
             } else {
-                self.hal.teks(MARGIN + 12.0, self.y + ukuran, ukuran, false, TEKS, b);
+                self.hal
+                    .teks(MARGIN + 12.0, self.y + ukuran, ukuran, false, TEKS, b);
             }
             self.y += tinggi;
         }
@@ -196,9 +214,11 @@ impl Penulis {
         for (k, w) in kol.iter().zip(lebar) {
             let teks = Page::potong(&k.judul, w - 6.0, ukuran, true);
             if k.kanan {
-                self.hal.teks_kanan(x + w - 4.0, self.y + 11.0, ukuran, true, "#475569", &teks);
+                self.hal
+                    .teks_kanan(x + w - 4.0, self.y + 11.0, ukuran, true, "#475569", &teks);
             } else {
-                self.hal.teks(x + 4.0, self.y + 11.0, ukuran, true, "#475569", &teks);
+                self.hal
+                    .teks(x + 4.0, self.y + 11.0, ukuran, true, "#475569", &teks);
             }
             x += w;
         }
@@ -227,8 +247,14 @@ impl Penulis {
             }
         };
         if baris.is_empty() {
-            self.hal
-                .teks(MARGIN + 4.0, self.y + 10.0, ukuran, false, REDUP, "Tidak ada data.");
+            self.hal.teks(
+                MARGIN + 4.0,
+                self.y + 10.0,
+                ukuran,
+                false,
+                REDUP,
+                "Tidak ada data.",
+            );
             self.y += tinggi;
         }
         for (i, sel) in baris.iter().enumerate() {
@@ -247,9 +273,16 @@ impl Penulis {
                 self.halaman_baru();
                 self.kepala_tabel(kol, &lebar, ukuran);
             }
+            self.hal.garis(
+                MARGIN,
+                self.y + 0.5,
+                MARGIN + LEBAR,
+                self.y + 0.5,
+                "#94a3b8",
+                0.8,
+            );
             self.hal
-                .garis(MARGIN, self.y + 0.5, MARGIN + LEBAR, self.y + 0.5, "#94a3b8", 0.8);
-            self.hal.kotak(MARGIN, self.y + 1.0, LEBAR, tinggi, "#eef1fa");
+                .kotak(MARGIN, self.y + 1.0, LEBAR, tinggi, "#eef1fa");
             tulis(&mut self.hal, self.y + 1.0, sel, true);
             self.y += tinggi + 1.0;
         }
@@ -316,7 +349,8 @@ impl Penulis {
         for (i, l) in langkah.iter().enumerate() {
             for (j, b) in l.iter().enumerate() {
                 if j == 0 {
-                    self.hal.teks(x, y + 8.3, 8.3, true, UTAMA, &format!("{}.", i + 1));
+                    self.hal
+                        .teks(x, y + 8.3, 8.3, true, UTAMA, &format!("{}.", i + 1));
                 }
                 self.hal.teks(x + 12.0, y + 8.3, 8.3, false, TINTA, b);
                 y += 11.6;
@@ -353,7 +387,14 @@ impl Penulis {
                 p.kotak(0.0, 0.0, A4_W, 26.0, TINTA);
                 p.kotak(MARGIN, 6.0, 3.5, 14.0, UTAMA);
                 p.teks(MARGIN + 10.0, 16.5, 8.0, true, "#ffffff", &self.judul);
-                p.teks_kanan(A4_W - MARGIN, 16.5, 7.5, false, "#93a2c4", "Kejaksaan Republik Indonesia");
+                p.teks_kanan(
+                    A4_W - MARGIN,
+                    16.5,
+                    7.5,
+                    false,
+                    "#93a2c4",
+                    "Kejaksaan Republik Indonesia",
+                );
             }
             p.garis(MARGIN, A4_H - 34.0, A4_W - MARGIN, A4_H - 34.0, GARIS, 0.6);
             let kaki = if self.contoh {
@@ -401,7 +442,10 @@ mod tests {
         );
         let b = w.selesai("D:20260101120000Z");
         let teks = String::from_utf8_lossy(&b);
-        assert!(teks.contains("/Count 3"), "150 baris memerlukan tiga halaman");
+        assert!(
+            teks.contains("/Count 3"),
+            "150 baris memerlukan tiga halaman"
+        );
         assert_eq!(teks.matches("NAMA-KOLOM-UJI").count(), 3, "kepala berulang");
         assert!(teks.contains("Halaman 3 dari 3"));
         assert!(teks.contains("Satuan kerja 149"));

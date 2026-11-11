@@ -63,7 +63,7 @@ pub fn lebar_teks(s: &str, ukuran: f64, tebal: bool) -> f64 {
 fn map_byte(c: char) -> u8 {
     let b = c as u32;
     match b {
-        0x2013 | 0x2014 | 0x2015 => b'-',
+        0x2013..=0x2015 => b'-',
         0x00b7 | 0x2022 | 0x25cf => b'-',
         0x2018 | 0x2019 => b'\'',
         0x201c | 0x201d => b'"',
@@ -424,8 +424,8 @@ impl Dokumen {
         let xref = out.len();
         out.extend_from_slice(format!("xref\n0 {total}\n").as_bytes());
         out.extend_from_slice(b"0000000000 65535 f \n");
-        for id in 1..total {
-            out.extend_from_slice(format!("{:010} 00000 n \n", offset[id]).as_bytes());
+        for off in offset.iter().skip(1) {
+            out.extend_from_slice(format!("{off:010} 00000 n \n").as_bytes());
         }
         out.extend_from_slice(
             format!(
@@ -489,12 +489,23 @@ mod tests {
 
     #[test]
     fn bungkus_memecah_sesuai_lebar() {
-        let baris = bungkus("satu dua tiga empat lima enam tujuh delapan", 60.0, 10.0, false);
+        let baris = bungkus(
+            "satu dua tiga empat lima enam tujuh delapan",
+            60.0,
+            10.0,
+            false,
+        );
         assert!(baris.len() >= 3);
         assert!(baris.iter().all(|b| lebar_teks(b, 10.0, false) <= 60.0));
-        assert_eq!(baris.join(" "), "satu dua tiga empat lima enam tujuh delapan");
+        assert_eq!(
+            baris.join(" "),
+            "satu dua tiga empat lima enam tujuh delapan"
+        );
         // Kata yang lebih lebar dari kolom tetap dicetak utuh pada barisnya sendiri.
-        assert_eq!(bungkus("kata-sangat-panjang-sekali x", 20.0, 10.0, false).len(), 2);
+        assert_eq!(
+            bungkus("kata-sangat-panjang-sekali x", 20.0, 10.0, false).len(),
+            2
+        );
         assert!(bungkus("   ", 50.0, 10.0, false).is_empty());
     }
 

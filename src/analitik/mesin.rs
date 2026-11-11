@@ -371,13 +371,8 @@ pub struct Turunan {
 }
 
 /// Turunkan besaran analitik satu aset dari model.
-pub fn turunkan(
-    f: &Fakta,
-    kelompok: &str,
-    kode_satker: &str,
-    m: &Model,
-    k: &Konteks,
-) -> Turunan {
+#[allow(clippy::needless_range_loop)]
+pub fn turunkan(f: &Fakta, kelompok: &str, kode_satker: &str, m: &Model, k: &Konteks) -> Turunan {
     let def: &TableDef = &TABLES[f.tabel];
     let mut t = Turunan {
         umur: umur_aset(f.tahun, f.bulan, k),
@@ -630,7 +625,9 @@ fn baris_satker(s: &SatkerSimpan) -> SatkerBaris {
 }
 
 fn label_pita(i: usize) -> &'static str {
-    ["0-2 th", "3-5 th", "6-10 th", "11-15 th", "16-20 th", "21-30 th", "> 30 th"][i]
+    [
+        "0-2 th", "3-5 th", "6-10 th", "11-15 th", "16-20 th", "21-30 th", "> 30 th",
+    ][i]
 }
 
 fn pita_umur(a: f64) -> usize {
@@ -724,9 +721,7 @@ fn mae_pita(titik: &[TitikKurva]) -> f64 {
     100.0
         * titik
             .iter()
-            .map(|t| {
-                t.n as f64 * ((t.obs_tb - t.mod_tb).abs() + (t.obs_rb - t.mod_rb).abs()) / 2.0
-            })
+            .map(|t| t.n as f64 * ((t.obs_tb - t.mod_tb).abs() + (t.obs_rb - t.mod_rb).abs()) / 2.0)
             .sum::<f64>()
         / n
 }
@@ -766,6 +761,11 @@ struct Mutu {
     rasio: Vec<f64>,
 }
 
+/// Perolehan satu tahun per tabel katalog: (unit, nilai).
+type BarisTren = Vec<(i64, f64)>;
+/// Deret tahunan: (tahun, nilai).
+type DeretTahun = Vec<(i32, f64)>;
+
 /// Lintasan kedua: hitung seluruh ringkasan, proyeksi, dan kebutuhan.
 pub fn hitung(fakta: &[Fakta], kamus: &Kamus, k: &Konteks) -> Hasil {
     let nt = TABLES.len();
@@ -787,7 +787,7 @@ pub fn hitung(fakta: &[Fakta], kamus: &Kamus, k: &Konteks) -> Hasil {
     let mut calon_risiko: Vec<(f64, f64, usize)> = Vec::new();
     let mut butuh: HashMap<(usize, usize), ButuhKelompok> = HashMap::new();
     // Indeks 0 = posisi kini; 1..=NH = akhir tiap tahun proyeksi.
-    let mut buku_th = vec![(0.0_f64, 0.0_f64); NH + 1];
+    let mut buku_th = [(0.0_f64, 0.0_f64); NH + 1];
     let mut mutu = Mutu::default();
     let mut dikecualikan = 0i64;
 
@@ -983,7 +983,12 @@ pub fn hitung(fakta: &[Fakta], kamus: &Kamus, k: &Konteks) -> Hasil {
             peringkat: 0,
         });
     }
-    simpan.sort_by(|a, b| b.skor.total.total_cmp(&a.skor.total).then(a.nama.cmp(&b.nama)));
+    simpan.sort_by(|a, b| {
+        b.skor
+            .total
+            .total_cmp(&a.skor.total)
+            .then(a.nama.cmp(&b.nama))
+    });
     for (i, s) in simpan.iter_mut().enumerate() {
         s.peringkat = i as i64 + 1;
     }
@@ -1011,7 +1016,7 @@ pub fn hitung(fakta: &[Fakta], kamus: &Kamus, k: &Konteks) -> Hasil {
         .filter(|t| per_tabel[*t].unit > 0)
         .map(|t| {
             let def = &TABLES[t];
-            let mut r = per_tabel[t].clone();
+            let mut r = per_tabel[t];
             r.bulatkan();
             KategoriBaris {
                 tabel: def.table.to_string(),
@@ -1061,9 +1066,14 @@ pub fn hitung(fakta: &[Fakta], kamus: &Kamus, k: &Konteks) -> Hasil {
             nilai: v.iter().map(|x| x.1).sum(),
         })
         .collect();
-    let deret = |pilih: &dyn Fn(&Vec<(i64, f64)>) -> (f64, f64)| -> (Vec<(i32, f64)>, Vec<(i32, f64)>, (f64, f64)) {
+    let deret = |pilih: &dyn Fn(&BarisTren) -> (f64, f64)| -> (DeretTahun, DeretTahun, (f64, f64)) {
         // Tahun penuh saja; tahun berjalan belum selesai sehingga dipisahkan.
-        let awal = tren.keys().next().copied().unwrap_or(k.tahun0).max(k.tahun0 - 20);
+        let awal = tren
+            .keys()
+            .next()
+            .copied()
+            .unwrap_or(k.tahun0)
+            .max(k.tahun0 - 20);
         let mut unit = Vec::new();
         let mut nilai = Vec::new();
         for y in awal..k.tahun0 {
@@ -1351,7 +1361,10 @@ pub mod uji {
         let mut id = 0;
         for nama in tabel_dipakai {
             let ti = tabel(nama);
-            for (i, row) in crate::demo::baris_tabel(nama, 2026, 6).into_iter().enumerate() {
+            for (i, row) in crate::demo::baris_tabel(nama, 2026, 6)
+                .into_iter()
+                .enumerate()
+            {
                 let row = crate::fakta::normalkan(row);
                 let c = crate::fakta::ekstrak(&row, i);
                 id += 1;
@@ -1374,7 +1387,13 @@ pub mod uji {
         (out, kamus)
     }
 
-    fn satu(tabel_nama: &str, kondisi: i64, tahun: i32, sisa: Option<f64>, nilai: f64) -> (Vec<Fakta>, Kamus) {
+    fn satu(
+        tabel_nama: &str,
+        kondisi: i64,
+        tahun: i32,
+        sisa: Option<f64>,
+        nilai: f64,
+    ) -> (Vec<Fakta>, Kamus) {
         let mut kamus = Kamus::default();
         let f = Fakta {
             id: 1,
@@ -1395,13 +1414,23 @@ pub mod uji {
 
     #[test]
     fn rusak_berat_menjadi_tunggakan_semua_skenario() {
-        let (f, kamus) = satu("SIMAN2_M_ASET_KHUSUS_TIK", K_RB, 2016, Some(0.0), 10_000_000.0);
+        let (f, kamus) = satu(
+            "SIMAN2_M_ASET_KHUSUS_TIK",
+            K_RB,
+            2016,
+            Some(0.0),
+            10_000_000.0,
+        );
         let h = hitung(&f, &kamus, &konteks());
         let r = &h.analisis.nasional;
         assert_eq!(r.rb, 1);
         assert_eq!(r.habis, 1);
         assert_eq!(r.ganti_kini, [1.0, 1.0, 1.0]);
-        assert_eq!(r.rb_5(), 0.0, "yang sudah rusak berat tidak diproyeksikan lagi");
+        assert_eq!(
+            r.rb_5(),
+            0.0,
+            "yang sudah rusak berat tidak diproyeksikan lagi"
+        );
         assert!(r.ganti_th.iter().all(|s| s.iter().all(|x| *x == 0.0)));
         // Biaya memakai nilai perolehan dieskalasi (kelompok tanpa harga acuan).
         assert!(r.biaya_kini[0] > 10_000_000.0);
@@ -1409,7 +1438,13 @@ pub mod uji {
 
     #[test]
     fn baik_habis_masa_manfaat_hanya_skenario_maksimal() {
-        let (f, kamus) = satu("SIMAN2_M_ASET_KHUSUS_TIK", K_BAIK, 2018, Some(0.0), 10_000_000.0);
+        let (f, kamus) = satu(
+            "SIMAN2_M_ASET_KHUSUS_TIK",
+            K_BAIK,
+            2018,
+            Some(0.0),
+            10_000_000.0,
+        );
         let r = hitung(&f, &kamus, &konteks()).analisis.nasional;
         assert_eq!(r.habis, 1);
         assert_eq!(r.ganti_kini, [0.0, 0.0, 1.0]);
@@ -1421,16 +1456,31 @@ pub mod uji {
 
     #[test]
     fn rusak_ringan_habis_masa_manfaat_masuk_moderat() {
-        let (f, kamus) = satu("SIMAN2_M_ASET_KHUSUS_TIK", K_RR, 2018, Some(0.0), 10_000_000.0);
+        let (f, kamus) = satu(
+            "SIMAN2_M_ASET_KHUSUS_TIK",
+            K_RR,
+            2018,
+            Some(0.0),
+            10_000_000.0,
+        );
         let r = hitung(&f, &kamus, &konteks()).analisis.nasional;
         assert_eq!(r.ganti_kini, [0.0, 1.0, 1.0]);
-        assert!(r.rb_5() > 0.3, "rusak ringan berpeluang besar menjadi rusak berat");
+        assert!(
+            r.rb_5() > 0.3,
+            "rusak ringan berpeluang besar menjadi rusak berat"
+        );
     }
 
     #[test]
     fn habis_masa_manfaat_dipetakan_ke_tahun_yang_benar() {
         // Data per pertengahan Juni 2026; sisa 0,3 th → habis 2026; sisa 2 th → 2028.
-        let (mut f, kamus) = satu("SIMAN2_M_ASET_NON_TIK", K_BAIK, 2022, Some(0.3), 5_000_000.0);
+        let (mut f, kamus) = satu(
+            "SIMAN2_M_ASET_NON_TIK",
+            K_BAIK,
+            2022,
+            Some(0.3),
+            5_000_000.0,
+        );
         let mut g = f[0].clone();
         g.id = 2;
         g.umur_sisa = Some(2.0);
@@ -1486,7 +1536,10 @@ pub mod uji {
         f[0].buku = 6e6;
         let h = hitung(&f, &kamus, &konteks());
         let r = &h.analisis.nasional;
-        assert_eq!(r.habis, 0, "nilai buku 60% berarti belum habis masa manfaat");
+        assert_eq!(
+            r.habis, 0,
+            "nilai buku 60% berarti belum habis masa manfaat"
+        );
         let an = h
             .analisis
             .kualitas
@@ -1517,7 +1570,11 @@ pub mod uji {
         let nilai_kat: f64 = a.kategori.iter().map(|c| c.r.nilai).sum();
         assert!((nilai_kat - nas.nilai).abs() / nas.nilai < 1e-9);
         let rb5_sat: f64 = h.satker.iter().map(|s| s.rb5).sum();
-        assert!((rb5_sat - nas.rb_5()).abs() < 1.0, "{rb5_sat} vs {}", nas.rb_5());
+        assert!(
+            (rb5_sat - nas.rb_5()).abs() < 1.0,
+            "{rb5_sat} vs {}",
+            nas.rb_5()
+        );
         assert_eq!(a.meta.total_satker as usize, h.satker.len());
         assert_eq!(a.meta.total_provinsi, 38);
         // Skenario makin luas makin besar kebutuhannya.
@@ -1538,7 +1595,12 @@ pub mod uji {
             "SIMAN2_M_ASET_ALAT_BESAR",
         ]);
         let h = hitung(&f, &kamus, &konteks());
-        let tik = h.analisis.model.iter().find(|m| m.label == "Peralatan TIK").unwrap();
+        let tik = h
+            .analisis
+            .model
+            .iter()
+            .find(|m| m.label == "Peralatan TIK")
+            .unwrap();
         let angkutan = h
             .analisis
             .model
@@ -1546,17 +1608,43 @@ pub mod uji {
             .find(|m| m.label == "Angkutan Bermotor")
             .unwrap();
         assert!(!tik.gabungan && !angkutan.gabungan);
-        assert!(tik.median_mulai < angkutan.median_mulai, "TIK lebih cepat rusak");
-        assert!(tik.mae < 6.0 && angkutan.mae < 6.0, "mae {} {}", tik.mae, angkutan.mae);
+        assert!(
+            tik.median_mulai < angkutan.median_mulai,
+            "TIK lebih cepat rusak"
+        );
+        assert!(
+            tik.mae < 6.0 && angkutan.mae < 6.0,
+            "mae {} {}",
+            tik.mae,
+            angkutan.mae
+        );
         assert!(tik.bentuk > 1.0, "laju kerusakan naik seiring umur");
-        let besar = h.analisis.model.iter().find(|m| m.label == "Alat Besar").unwrap();
+        let besar = h
+            .analisis
+            .model
+            .iter()
+            .find(|m| m.label == "Alat Besar")
+            .unwrap();
         assert!(besar.median_mulai > 0.0);
         // Masa manfaat efektif dari data mendekati masa manfaat sebenarnya.
-        let kat = h.analisis.kategori.iter().find(|c| c.label == "Peralatan TIK").unwrap();
-        assert!((kat.masa_manfaat - 4.0).abs() < 0.6, "masa {}", kat.masa_manfaat);
+        let kat = h
+            .analisis
+            .kategori
+            .iter()
+            .find(|c| c.label == "Peralatan TIK")
+            .unwrap();
+        assert!(
+            (kat.masa_manfaat - 4.0).abs() < 0.6,
+            "masa {}",
+            kat.masa_manfaat
+        );
         // Uji satuan umur_sisa: data contoh konsisten dalam tahun.
         let q = &h.analisis.kualitas;
-        assert!((0.7..=1.4).contains(&q.rasio_umur_sisa), "rasio {}", q.rasio_umur_sisa);
+        assert!(
+            (0.7..=1.4).contains(&q.rasio_umur_sisa),
+            "rasio {}",
+            q.rasio_umur_sisa
+        );
     }
 
     #[test]
@@ -1596,10 +1684,16 @@ pub mod uji {
         assert_eq!(total.unit.ramal.len(), NH);
         assert_eq!(total.unit.ramal[0].tahun, 2026);
         assert_eq!(total.unit.ramal[NH - 1].tahun, 2031);
-        assert!(total.unit.riwayat.iter().all(|p| p.0 < 2026), "tahun berjalan dipisah");
+        assert!(
+            total.unit.riwayat.iter().all(|p| p.0 < 2026),
+            "tahun berjalan dipisah"
+        );
         assert!(total.berjalan.0 > 0.0);
         assert!(a.kapasitas.unit_per_tahun > 0.0);
-        assert_eq!((a.kapasitas.tahun_awal, a.kapasitas.tahun_akhir), (2021, 2025));
+        assert_eq!(
+            (a.kapasitas.tahun_awal, a.kapasitas.tahun_akhir),
+            (2021, 2025)
+        );
         // Nilai buku portofolio yang ada turun bila tidak ada pengadaan baru.
         assert_eq!(a.buku_th.len(), NH + 1);
         assert!(a.buku_th[NH].total < a.buku_th[0].total);
@@ -1614,41 +1708,106 @@ pub mod uji {
     fn cetak_ringkasan_contoh() {
         let semua: Vec<&str> = TABLES.iter().map(|t| t.table).collect();
         let mulai = std::time::Instant::now();
-        let (f, kamus) = fakta_contoh(&semua);
+        let (mut f, kamus) = fakta_contoh(&semua);
+        // `SKALA=16` menggandakan fakta untuk mengukur kinerja pada ukuran data nyata.
+        let skala: usize = std::env::var("SKALA")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1);
+        let asli = f.clone();
+        for k in 1..skala {
+            f.extend(asli.iter().cloned().map(|mut x| {
+                x.id += (k * asli.len()) as i64;
+                x
+            }));
+        }
         let muat = mulai.elapsed();
         let mulai = std::time::Instant::now();
         let h = hitung(&f, &kamus, &konteks());
-        println!("fakta {} | muat {:?} | hitung {:?}", f.len(), muat, mulai.elapsed());
+        println!(
+            "fakta {} | muat {:?} | hitung {:?}",
+            f.len(),
+            muat,
+            mulai.elapsed()
+        );
         let a = &h.analisis;
         let r = &a.nasional;
-        println!("unit {} nilai {:.3e} buku {:.3e} satker {} prov {}", r.unit, r.nilai, r.buku, a.meta.total_satker, a.meta.total_provinsi);
-        println!("baik {:.1}% rr {} rb {} tak {} | habis {} ({:.1}%) | idle {} hilang {}", r.pct_baik(), r.rr, r.rb, r.tak, r.habis, r.pct_habis(), r.idle, r.hilang);
+        println!(
+            "unit {} nilai {:.3e} buku {:.3e} satker {} prov {}",
+            r.unit, r.nilai, r.buku, a.meta.total_satker, a.meta.total_provinsi
+        );
+        println!(
+            "baik {:.1}% rr {} rb {} tak {} | habis {} ({:.1}%) | idle {} hilang {}",
+            r.pct_baik(),
+            r.rr,
+            r.rb,
+            r.tak,
+            r.habis,
+            r.pct_habis(),
+            r.idle,
+            r.hilang
+        );
         println!("habis_th {:?}", r.habis_th);
         println!("rb_th {:?}", r.rb_th);
         for s in 0..3 {
-            println!("skenario {s}: kini {:.0} unit Rp{:.3e} | 5th {:.0} unit Rp{:.3e}", r.ganti_kini[s], r.biaya_kini[s], r.ganti_total(s), r.biaya_total(s));
+            println!(
+                "skenario {s}: kini {:.0} unit Rp{:.3e} | 5th {:.0} unit Rp{:.3e}",
+                r.ganti_kini[s],
+                r.biaya_kini[s],
+                r.ganti_total(s),
+                r.biaya_total(s)
+            );
         }
         println!("kapasitas {:.0} unit/th Rp{:.3e}/th | skor {:.1} | psp {:.1}% sertifikat {:.1}% lengkap {:.1}%", a.kapasitas.unit_per_tahun, a.kapasitas.nilai_per_tahun, a.skor.total, r.pct_psp(), r.pct_sertifikat(), r.pct_lengkap());
         for c in &a.kategori {
             println!("  {:<28} unit {:>6} nilai {:>10.3e} baik {:>5.1}% rb {:>5} habis {:>5.1}% rb5 {:>7.1} masa {:>4.1} butuh1 {:>7.0}", c.label, c.r.unit, c.r.nilai, c.r.pct_baik(), c.r.rb, c.r.pct_habis(), c.r.rb_5(), c.masa_manfaat, c.r.ganti_total(1));
         }
         for m in &a.model {
-            println!("  model {:<22} n {:>6} gab {} median {:>5.1} lamaRR {:>4.1} beta {:.2} mae {:.1}", m.label, m.n, m.gabungan, m.median_mulai, m.lama_rr, m.bentuk, m.mae);
+            println!(
+                "  model {:<22} n {:>6} gab {} median {:>5.1} lamaRR {:>4.1} beta {:.2} mae {:.1}",
+                m.label, m.n, m.gabungan, m.median_mulai, m.lama_rr, m.bentuk, m.mae
+            );
         }
         for p in a.prakiraan.iter().take(3) {
-            println!("  prakiraan {:<20} {} galat {:.1} | {:?}", p.label, p.unit.metode, p.unit.galat, p.unit.ramal.iter().map(|t| t.nilai.round()).collect::<Vec<_>>());
+            println!(
+                "  prakiraan {:<20} {} galat {:.1} | {:?}",
+                p.label,
+                p.unit.metode,
+                p.unit.galat,
+                p.unit
+                    .ramal
+                    .iter()
+                    .map(|t| t.nilai.round())
+                    .collect::<Vec<_>>()
+            );
         }
         let mut skor: Vec<f64> = h.satker.iter().map(|s| s.skor).collect();
         skor.sort_by(|x, y| x.total_cmp(y));
-        println!("skor satker min {:.1} med {:.1} max {:.1} | kritis {} perhatian {}", skor[0], skor[skor.len() / 2], skor[skor.len() - 1], skor.iter().filter(|x| **x < 65.0).count(), skor.iter().filter(|x| **x >= 65.0 && **x < 80.0).count());
-        println!("rasio umur_sisa {} | {}", a.kualitas.rasio_umur_sisa, a.kualitas.catatan_umur_sisa);
+        println!(
+            "skor satker min {:.1} med {:.1} max {:.1} | kritis {} perhatian {}",
+            skor[0],
+            skor[skor.len() / 2],
+            skor[skor.len() - 1],
+            skor.iter().filter(|x| **x < 65.0).count(),
+            skor.iter().filter(|x| **x >= 65.0 && **x < 80.0).count()
+        );
+        println!(
+            "rasio umur_sisa {} | {}",
+            a.kualitas.rasio_umur_sisa, a.kualitas.catatan_umur_sisa
+        );
         for s in &a.sorotan {
             println!("  [{}] {}: {}", s.nada, s.judul, s.isi);
         }
         for x in &a.rekomendasi {
             println!("  (P{}) {} — {}", x.prioritas, x.judul, x.temuan);
         }
-        println!("json analisis {} KB", serde_json::to_string(a).unwrap().len() / 1024);
-        println!("json satker {} KB", serde_json::to_string(&h.satker).unwrap().len() / 1024);
+        println!(
+            "json analisis {} KB",
+            serde_json::to_string(a).unwrap().len() / 1024
+        );
+        println!(
+            "json satker {} KB",
+            serde_json::to_string(&h.satker).unwrap().len() / 1024
+        );
     }
 }

@@ -107,7 +107,12 @@ pub fn format_desimal(v: f64, digit: usize) -> String {
     let neg = bulat.starts_with('-');
     let angka: i64 = bulat.trim_start_matches('-').parse().unwrap_or(0);
     let mut out = format_number(angka);
-    if neg && (angka != 0 || pecahan.as_deref().is_some_and(|p| p.chars().any(|c| c != '0'))) {
+    if neg
+        && (angka != 0
+            || pecahan
+                .as_deref()
+                .is_some_and(|p| p.chars().any(|c| c != '0')))
+    {
         out = format!("-{out}");
     }
     match pecahan {
@@ -214,13 +219,7 @@ pub fn to_f64(v: &serde_json::Value) -> f64 {
     match v {
         serde_json::Value::Number(n) => n.as_f64().unwrap_or(0.0),
         serde_json::Value::String(s) => parse_angka(s).unwrap_or(0.0),
-        serde_json::Value::Bool(b) => {
-            if *b {
-                1.0
-            } else {
-                0.0
-            }
-        }
+        serde_json::Value::Bool(b) if *b => 1.0,
         _ => 0.0,
     }
 }
